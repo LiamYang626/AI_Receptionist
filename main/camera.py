@@ -13,8 +13,8 @@ from vision.utils import initialize_object_detector, initialize_face_detector, i
 import chat.gpt as gpt
 # from vision.visualization import draw_bounding_box
 
-fileEncodingsName = 'models/encodings-everyone-2023-11-30-17-50-53-weekofcode2324.dat'
-filePersonsNames = 'models/persons-everyone-2023-11-30-17-50-53-weekofcode2324.dat'
+fileEncodingsName = '../models/encodings-everyone-2023-11-30-17-50-53-weekofcode2324.dat'
+filePersonsNames = '../models/persons-everyone-2023-11-30-17-50-53-weekofcode2324.dat'
 encodeListKnown, classNames = encode_file(fileEncodingsName, filePersonsNames)
 
 # Set up the Face Mesh with refine_landmarks=True to get iris landmarks
@@ -42,7 +42,7 @@ SERVER_ADDRESS = (SERVER_IP, SERVER_PORT)
 iris_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 # Prepare for CSV logging (optional)
-LOG_DATA = True
+LOG_DATA = False
 LOG_FOLDER = "logs"
 if not os.path.exists(LOG_FOLDER):
     os.makedirs(LOG_FOLDER)
