@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c29e9fc-f4e5-4510-a22e-27d857d52c91" name="Changes" comment="second commit">
-      <change beforePath="$PROJECT_DIR$/.idea/Receptionist.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Receptionist.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/camera.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/camera.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/vision/recognition.py" beforeDir="false" afterPath="$PROJECT_DIR$/vision/recognition.py" afterDir="false" />
@@ -44,7 +42,7 @@
       <recent name="$PROJECT_DIR$/vision" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.launcher">
+  <component name="RunManager" selected="Python.camera">
     <configuration name="asd" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Receptionist" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -58,6 +56,27 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/asd.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="camera" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Receptionist" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/main" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main/camera.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -152,6 +171,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.camera" />
         <item itemvalue="Python.launcher" />
         <item itemvalue="Python.asd" />
         <item itemvalue="Python.recognition" />
@@ -178,7 +198,14 @@
       <option name="project" value="LOCAL" />
       <updated>1737022924315</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="second commit">
+      <created>1737422281418</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1737422281418</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

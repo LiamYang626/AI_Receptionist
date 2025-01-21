@@ -4,13 +4,11 @@ import socket
 import os
 import csv
 import traceback
-from openai import OpenAI
 from vision.gaze import gaze
 from vision.detector import detect_people
 from vision.tracking import initialize_deepsort, track_objects
 from vision.recognition import encode_file, recognizing_face
 from vision.utils import initialize_object_detector, initialize_face_detector, initialize_landmark_detector
-import chat.gpt as gpt
 # from vision.visualization import draw_bounding_box
 
 fileEncodingsName = '../models/encodings-everyone-2023-11-30-17-50-53-weekofcode2324.dat'
@@ -35,6 +33,7 @@ deepsort = initialize_deepsort()
 # To store the name associated with each tracked object (track_id)
 track_id_to_name = {}
 
+
 # Initialize socket for data transmission (optional)
 SERVER_IP = "127.0.0.1"  # Set the server IP address (localhost)
 SERVER_PORT = 7070  # Set the server port
@@ -42,7 +41,7 @@ SERVER_ADDRESS = (SERVER_IP, SERVER_PORT)
 iris_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 # Prepare for CSV logging (optional)
-LOG_DATA = False
+LOG_DATA = True
 LOG_FOLDER = "logs"
 if not os.path.exists(LOG_FOLDER):
     os.makedirs(LOG_FOLDER)
