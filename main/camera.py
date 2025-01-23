@@ -25,7 +25,7 @@ face_detector = initialize_face_detector()
 model = initialize_object_detector()
 
 # Command-line arguments for camera source
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 # Initialize DeepSORT tracker
 deepsort = initialize_deepsort()
@@ -105,9 +105,8 @@ def vision_process(shared_queue):
                     text_size = cv2.getTextSize(name, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)[0]
                     cv2.putText(frame, name, (x1 + (x2 - x1) // 2 - text_size[0] // 2, y1 - 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
-
-                print(f"[Vision] Detected: {name}")
-                shared_queue.put(name)
+                    # print(f"[Vision] Detected: {name}")
+                    shared_queue.put(name)
 
             # Process the frame with Face Mesh
             results_mesh = face_mesh.process(rgb_frame)

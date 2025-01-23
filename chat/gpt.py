@@ -1,4 +1,5 @@
 import openai
+import time
 from openai import OpenAI
 import whisper
 from pydub import AudioSegment
@@ -12,7 +13,7 @@ API_KEY = os.getenv("OPENAI_API_KEY")
 ASSISTANT_ID = os.getenv("ASSISTANT_KEY")
 
 VOICE_TTS = "Ava (Premium)"  # e.g., "Samantha", "Ava (Premium)"
-ONLY_TEXT = False  # Set to True for text-only interaction
+ONLY_TEXT = True  # Set to True for text-only interaction
 
 # ========= Initialize OpenAI Client =========
 client = OpenAI(api_key=API_KEY)
@@ -55,12 +56,18 @@ def wait_on_run(run, thread):
     """
     Polls run status until it is no longer 'queued' or 'in_progress'.
     """
-    while run.status in ["queued", "in_progress"]:
-        run = client.beta.threads.runs.retrieve(
+    while True:
+        run_status = client.beta.threads.runs.retrieve(
             thread_id=thread.id,
             run_id=run.id
         )
-    return run
+
+        if run_status.status == "completed":
+            break
+        elif run_status.status == "failed":
+            print("Run failed:", run_status.last_error)
+            break
+        time.sleep(2)
 
 
 def get_response(thread):
@@ -77,11 +84,11 @@ def pretty_print(messages, enable_tts: bool = False):
     """
     if not messages:
         return
-    last_message = messages[-1]
+    messages_list = list(messages)
+    last_message = messages_list[-1]
     role = last_message.role
     content = last_message.content[0].text.value
 
-    print(f"# {role.capitalize()} Message")
     print(f"{role}: {content}")
 
     if enable_tts and role == "assistant":
@@ -128,12 +135,11 @@ def openai_transcribe_audio(filepath: str) -> str:
 def main():
     new_thread = True
     thread = None
-    run = None
 
     if ONLY_TEXT:
         # Text-only loop
         while True:
-            message = input("Type Your Message (Ctrl+C to exit): ")
+            message = input("Type Your Message: ")
             if not message.strip():
                 continue
 
@@ -143,7 +149,7 @@ def main():
             else:
                 run = continue_thread_and_run(thread, message)
 
-            run = wait_on_run(run, thread)
+            wait_on_run(run, thread)
             pretty_print(get_response(thread))
 
     else:
@@ -180,7 +186,7 @@ def main():
                 else:
                     run = continue_thread_and_run(thread, message)
 
-                run = wait_on_run(run, thread)
+                wait_on_run(run, thread)
                 pretty_print(get_response(thread), enable_tts=True)
 
             except sr.WaitTimeoutError:

@@ -20,7 +20,7 @@ def encode_file(encoding_file, name_file):
     return encoded_lists, name_lists
 
 
-def recognizing_face(frame_people, encode_list, face_names, threshold=0.41, margin=0.01):
+def recognizing_face(frame_people, encode_list, face_names, threshold=0.4, margin=0.01):
     frame_face = face_recognition.face_locations(frame_people, model="hog")
     encode_face_lists = face_recognition.face_encodings(frame_people, frame_face)
 

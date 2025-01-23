@@ -15,6 +15,6 @@ if __name__ == "__main__":
     p_camera.start()
     p_assistant.start()
 
-    # Wait for them to finish (or press Ctrl+C)
+    # Wait for them to finish
     p_camera.join()
     p_assistant.join()

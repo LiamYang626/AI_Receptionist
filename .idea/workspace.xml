@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4c29e9fc-f4e5-4510-a22e-27d857d52c91" name="Changes" comment="second commit">
+    <list default="true" id="4c29e9fc-f4e5-4510-a22e-27d857d52c91" name="Changes" comment="minor changes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chat/gpt.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat/gpt.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/assistant.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/assistant.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/camera.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/camera.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/launcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/launcher.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/vision/recognition.py" beforeDir="false" afterPath="$PROJECT_DIR$/vision/recognition.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vision/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/vision/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,7 +46,7 @@
       <recent name="$PROJECT_DIR$/vision" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.camera">
+  <component name="RunManager" selected="Python.launcher">
     <configuration name="asd" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Receptionist" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -85,7 +89,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="detector" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="gpt" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Receptionist" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -93,11 +97,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/vision" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/chat" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/vision/detector.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/chat/gpt.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -171,11 +175,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.camera" />
         <item itemvalue="Python.launcher" />
-        <item itemvalue="Python.asd" />
+        <item itemvalue="Python.gpt" />
         <item itemvalue="Python.recognition" />
-        <item itemvalue="Python.detector" />
+        <item itemvalue="Python.camera" />
+        <item itemvalue="Python.asd" />
       </list>
     </recent_temporary>
   </component>
@@ -205,7 +209,14 @@
       <option name="project" value="LOCAL" />
       <updated>1737422281418</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="minor changes">
+      <created>1737444360053</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1737444360053</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -225,6 +236,7 @@
       <path value="$PROJECT_DIR$" />
     </ignored-roots>
     <MESSAGE value="second commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="second commit" />
+    <MESSAGE value="minor changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="minor changes" />
   </component>
 </project>

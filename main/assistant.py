@@ -1,5 +1,6 @@
 from openai import OpenAI
 import whisper
+import time
 from pydub import AudioSegment
 import os
 import speech_recognition as sr
@@ -53,12 +54,18 @@ def wait_on_run(run, thread):
     """
     Polls run status until it is no longer 'queued' or 'in_progress'.
     """
-    while run.status in ["queued", "in_progress"]:
-        run = client.beta.threads.runs.retrieve(
+    while True:
+        run_status = client.beta.threads.runs.retrieve(
             thread_id=thread.id,
             run_id=run.id
         )
-    return run
+
+        if run_status.status == "completed":
+            break
+        elif run_status.status == "failed":
+            print("Run failed:", run_status.last_error)
+            break
+        time.sleep(2)
 
 
 def get_response(thread):
@@ -75,11 +82,11 @@ def pretty_print(messages, enable_tts: bool = False):
     """
     if not messages:
         return
-    last_message = messages[-1]
+    messages_list = list(messages)
+    last_message = messages_list[-1]
     role = last_message.role
     content = last_message.content[0].text.value
 
-    print(f"# {role.capitalize()} Message")
     print(f"{role}: {content}")
 
     if enable_tts and role == "assistant":
@@ -140,7 +147,7 @@ def assistant_process(shared_queue):
             if name not in name_to_thread:
                 # Create a new conversation thread for this name
                 thread, run = create_thread_and_run(f"Hi, my name is {name}")
-                run = wait_on_run(run, thread)
+                wait_on_run(run, thread)
 
                 # Retrieve assistant's response
                 messages = get_response(thread)
@@ -161,9 +168,9 @@ def assistant_process(shared_queue):
                 thread, run = create_thread_and_run(message)
                 new_thread = False
             else:
-                run = continue_thread_and_run(thread, message)
+                run = continue_thread_and_run(thread, user_message)
 
-            run = wait_on_run(run, thread)
+            wait_on_run(run, thread)
             pretty_print(get_response(thread))
 
     else:
