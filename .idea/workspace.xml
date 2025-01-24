@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4c29e9fc-f4e5-4510-a22e-27d857d52c91" name="Changes" comment="minor changes">
+    <list default="true" id="4c29e9fc-f4e5-4510-a22e-27d857d52c91" name="Changes" comment="testing name">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chat/gpt.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat/gpt.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/assistant.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/assistant.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/camera.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/camera.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/launcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/launcher.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vision/recognition.py" beforeDir="false" afterPath="$PROJECT_DIR$/vision/recognition.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vision/detector.py" beforeDir="false" afterPath="$PROJECT_DIR$/vision/detector.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/vision/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/vision/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -46,7 +43,7 @@
       <recent name="$PROJECT_DIR$/vision" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.launcher">
+  <component name="RunManager" selected="Python.gpt">
     <configuration name="asd" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Receptionist" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -175,8 +172,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.launcher" />
         <item itemvalue="Python.gpt" />
+        <item itemvalue="Python.launcher" />
         <item itemvalue="Python.recognition" />
         <item itemvalue="Python.camera" />
         <item itemvalue="Python.asd" />
@@ -216,7 +213,14 @@
       <option name="project" value="LOCAL" />
       <updated>1737444360053</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="testing name">
+      <created>1737616289441</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1737616289441</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -237,6 +241,7 @@
     </ignored-roots>
     <MESSAGE value="second commit" />
     <MESSAGE value="minor changes" />
-    <option name="LAST_COMMIT_MESSAGE" value="minor changes" />
+    <MESSAGE value="testing name" />
+    <option name="LAST_COMMIT_MESSAGE" value="testing name" />
   </component>
 </project>

@@ -3,7 +3,7 @@ from ultralytics import YOLO
 
 
 def initialize_object_detector():
-    return YOLO("yolov8n.pt", verbose=False)
+    return YOLO("yolov8n.pt")
 
 
 def initialize_face_detector():

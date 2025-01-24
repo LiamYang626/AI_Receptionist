@@ -1,5 +1,5 @@
 def detect_people(model, frame):
-    results = model(frame)
+    results = model(frame, verbose=False)
     detections = []
     for result in results:
         for detection in result.boxes.data.tolist():

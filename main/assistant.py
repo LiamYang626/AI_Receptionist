@@ -159,7 +159,7 @@ def assistant_process(shared_queue):
                 name_to_thread[name] = (thread, run)
                 new_thread = False
 
-            message = input("Type Your Message (Ctrl+C to exit): ")
+            message = input("Type Your Message: ")
 
             if not message.strip():
                 continue
@@ -168,7 +168,7 @@ def assistant_process(shared_queue):
                 thread, run = create_thread_and_run(message)
                 new_thread = False
             else:
-                run = continue_thread_and_run(thread, user_message)
+                run = continue_thread_and_run(thread, message)
 
             wait_on_run(run, thread)
             pretty_print(get_response(thread))
