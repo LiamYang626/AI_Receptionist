@@ -1,4 +1,5 @@
-# launcher.py
+import signal
+import sys
 import multiprocessing
 from camera import vision_process
 from assistant import assistant_process
@@ -18,21 +19,33 @@ def main():
     p_camera.start()
     p_assistant.start()
 
-    while True:
-        ask_signal = ask_queue.get()
-        if ask_signal == "received":
-            text = input("Type Your Message: ")
-            if not text.strip():
-                continue
+    '''
+    # Setup graceful shutdown handler
+    def signal_handler(sig, frame):
+        print("Shutdown signal received, terminating processes...")
+        p_camera.terminate()
+        p_assistant.terminate()
+        p_camera.join()
+        p_assistant.join()
+        sys.exit(0)
 
-            # Place the typed message onto the user_input_queue
-            message_queue.put(text)
-        else:
-            print(f"Main: Got some other signal: {ask_signal}")
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    '''
 
-    # Wait for them to finish
-    # p_camera.join()
-    # p_assistant.join()
+    try:
+        while True:
+            ask_signal = ask_queue.get()
+            if ask_signal == "received":
+                text = input("Type Your Message: ").strip()
+                if text:
+                    message_queue.put(text)
+            else:
+                print(f"Main: Got some other signal: {ask_signal}")
+
+    except Exception as e:
+        print("An error occurred in the main loop: %s", e)
+        # signal_handler(None, None)
 
 
 if __name__ == "__main__":

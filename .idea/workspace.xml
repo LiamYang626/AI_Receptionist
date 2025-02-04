@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4c29e9fc-f4e5-4510-a22e-27d857d52c91" name="Changes" comment="name fixed and disabled verbose">
+    <list default="true" id="4c29e9fc-f4e5-4510-a22e-27d857d52c91" name="Changes" comment="cleaned chat function">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/camera_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/assistant.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/assistant.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/launcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/launcher.py" afterDir="false" />
     </list>
@@ -227,7 +226,14 @@
       <option name="project" value="LOCAL" />
       <updated>1737689890173</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="cleaned chat function">
+      <created>1738635097859</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1738635097859</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -261,6 +267,7 @@
     <MESSAGE value="minor changes" />
     <MESSAGE value="testing name" />
     <MESSAGE value="name fixed and disabled verbose" />
-    <option name="LAST_COMMIT_MESSAGE" value="name fixed and disabled verbose" />
+    <MESSAGE value="cleaned chat function" />
+    <option name="LAST_COMMIT_MESSAGE" value="cleaned chat function" />
   </component>
 </project>

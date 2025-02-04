@@ -183,6 +183,7 @@ def assistant_process(shared_queue, message_queue, ask_queue):
             else:
                 run = continue_thread_and_run(thread, message)
 
+            print("sending message")
             wait_on_run(run, thread)
             pretty_print(get_response(thread))
 
