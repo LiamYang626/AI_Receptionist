@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4c29e9fc-f4e5-4510-a22e-27d857d52c91" name="Changes" comment="testing name">
+    <list default="true" id="4c29e9fc-f4e5-4510-a22e-27d857d52c91" name="Changes" comment="name fixed and disabled verbose">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/camera_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/assistant.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/assistant.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vision/detector.py" beforeDir="false" afterPath="$PROJECT_DIR$/vision/detector.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vision/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/vision/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/launcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/launcher.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,7 +43,7 @@
       <recent name="$PROJECT_DIR$/vision" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.gpt">
+  <component name="RunManager" selected="Python.launcher">
     <configuration name="asd" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Receptionist" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -78,6 +78,27 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main/camera.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="camera_test" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="Receptionist" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/camera_test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -128,27 +149,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
-      <module name="Receptionist" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="recognition" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Receptionist" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -172,8 +172,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.gpt" />
         <item itemvalue="Python.launcher" />
+        <item itemvalue="Python.gpt" />
         <item itemvalue="Python.recognition" />
         <item itemvalue="Python.camera" />
         <item itemvalue="Python.asd" />
@@ -220,8 +220,26 @@
       <option name="project" value="LOCAL" />
       <updated>1737616289441</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="name fixed and disabled verbose">
+      <created>1737689890173</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1737689890173</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ID_ORDER">
+      <list>
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
+        <option value="Space.CommitStatus" />
+      </list>
+    </option>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -242,6 +260,7 @@
     <MESSAGE value="second commit" />
     <MESSAGE value="minor changes" />
     <MESSAGE value="testing name" />
-    <option name="LAST_COMMIT_MESSAGE" value="testing name" />
+    <MESSAGE value="name fixed and disabled verbose" />
+    <option name="LAST_COMMIT_MESSAGE" value="name fixed and disabled verbose" />
   </component>
 </project>

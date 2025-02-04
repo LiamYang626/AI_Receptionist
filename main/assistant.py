@@ -70,22 +70,35 @@ def wait_on_run(run, thread):
 
 def get_response(thread):
     """
+    Returns the newest list of messages from the thread.
+    """
+    new_messages = client.beta.threads.messages.list(
+        thread_id=thread.id,
+        order="desc",
+        limit=1    # Change it to 2 if you want the user message also
+    )
+    messages_list = list(new_messages)
+    if not messages_list:
+        return None
+    return messages_list[0]
+
+
+def get_full_response(thread):
+    """
     Returns the full list of messages (in ascending order) from the thread.
     """
     return client.beta.threads.messages.list(thread_id=thread.id, order="asc")
 
 
-def pretty_print(messages, enable_tts: bool = False):
+def pretty_print(message, enable_tts: bool = False):
     """
     Prints the last assistant message. If enable_tts is True,
     uses macOS 'say' command for TTS (adjust if on another OS).
     """
-    if not messages:
+    if not message:
         return
-    messages_list = list(messages)
-    last_message = messages_list[-1]
-    role = last_message.role
-    content = last_message.content[0].text.value
+    role = message.role
+    content = message.content[0].text.value
 
     print(f"{role}: {content}")
 
@@ -130,10 +143,9 @@ def openai_transcribe_audio(filepath: str) -> str:
 
 
 # ========= Main Logic =========
-def assistant_process(shared_queue):
+def assistant_process(shared_queue, message_queue, ask_queue):
     new_thread = True
     thread = None
-    run = None
 
     name_to_thread = {}
 
@@ -158,8 +170,9 @@ def assistant_process(shared_queue):
                 # Store this so future messages for the same name can continue
                 name_to_thread[name] = (thread, run)
                 new_thread = False
+                ask_queue.put("received")
 
-            message = input("Type Your Message: ")
+            message = message_queue.get()
 
             if not message.strip():
                 continue
@@ -172,6 +185,8 @@ def assistant_process(shared_queue):
 
             wait_on_run(run, thread)
             pretty_print(get_response(thread))
+
+            ask_queue.put("received")
 
     else:
         # Speech loop
@@ -207,7 +222,7 @@ def assistant_process(shared_queue):
                 else:
                     run = continue_thread_and_run(thread, message)
 
-                run = wait_on_run(run, thread)
+                wait_on_run(run, thread)
                 pretty_print(get_response(thread), enable_tts=True)
 
             except sr.WaitTimeoutError:
