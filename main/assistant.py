@@ -212,10 +212,13 @@ def assistant_process(shared_queue, message_queue, signal_queue):
 
         while True:
             try:
-                new_name = shared_queue.get().strip()
+                new_name = ""
+                if not current_name or not shared_queue.empty():
+                    new_name = shared_queue.get().strip()
 
-                if new_name != current_name:
-                    print(f"Switching conversation to new recognized person: {new_name}")
+                if new_name != "" and new_name != current_name:
+                    if current_name:
+                        print(f"Switching conversation to new recognized person: {new_name}")
                     current_name = new_name
 
                     if current_name not in name_to_thread:
