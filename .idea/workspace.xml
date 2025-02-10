@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4c29e9fc-f4e5-4510-a22e-27d857d52c91" name="Changes" comment="Changed models">
+    <list default="true" id="4c29e9fc-f4e5-4510-a22e-27d857d52c91" name="Changes" comment="Switched user">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/camera_test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chat/gpt.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/main/assistant.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/assistant.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/camera.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/camera.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/launcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/launcher.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vision/recognition.py" beforeDir="false" afterPath="$PROJECT_DIR$/vision/recognition.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -242,7 +242,21 @@
       <option name="project" value="LOCAL" />
       <updated>1738648770247</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Switched user">
+      <created>1739151009496</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1739151009496</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Switched user">
+      <created>1739151163691</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1739151163691</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -278,6 +292,7 @@
     <MESSAGE value="name fixed and disabled verbose" />
     <MESSAGE value="cleaned chat function" />
     <MESSAGE value="Changed models" />
-    <option name="LAST_COMMIT_MESSAGE" value="Changed models" />
+    <MESSAGE value="Switched user" />
+    <option name="LAST_COMMIT_MESSAGE" value="Switched user" />
   </component>
 </project>

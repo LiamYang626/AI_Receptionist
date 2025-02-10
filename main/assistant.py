@@ -1,10 +1,11 @@
 from openai import OpenAI
 import whisper
-import time
-from pydub import AudioSegment
 import os
 import speech_recognition as sr
 from dotenv import load_dotenv
+from chat.response import get_response, pretty_print
+from chat.runs import wait_on_run
+from chat.threads import create_thread_and_run, continue_thread_and_run
 
 # ========= Constants =========
 load_dotenv()
@@ -15,131 +16,6 @@ ONLY_TEXT = True  # Set to True for text-only interaction
 
 # ========= Initialize OpenAI Client =========
 client = OpenAI(api_key=API_KEY)
-
-
-# ========= Thread and Message Helpers =========
-def submit_message(assistant_id: str, thread, user_message: str):
-    """
-    Submits a user message to the specified thread and starts a run.
-    Returns the newly created run.
-    """
-    client.beta.threads.messages.create(
-        thread_id=thread.id,
-        role="user",
-        content=user_message
-    )
-    return client.beta.threads.runs.create(
-        thread_id=thread.id,
-        assistant_id=assistant_id
-    )
-
-
-def create_thread_and_run(user_input: str):
-    """
-    Creates a new thread, submits the user message, and returns (thread, run).
-    """
-    thread = client.beta.threads.create()
-    run = submit_message(ASSISTANT_ID, thread, user_input)
-    return thread, run
-
-
-def continue_thread_and_run(thread, user_input: str):
-    """
-    Submits a user message to an existing thread and returns the run.
-    """
-    return submit_message(ASSISTANT_ID, thread, user_input)
-
-
-def wait_on_run(run, thread):
-    """
-    Polls run status until it is no longer 'queued' or 'in_progress'.
-    """
-    while True:
-        run_status = client.beta.threads.runs.retrieve(
-            thread_id=thread.id,
-            run_id=run.id
-        )
-
-        if run_status.status == "completed":
-            break
-        elif run_status.status == "failed":
-            print("Run failed:", run_status.last_error)
-            break
-        time.sleep(2)
-
-
-def get_response(thread):
-    """
-    Returns the newest list of messages from the thread.
-    """
-    new_messages = client.beta.threads.messages.list(
-        thread_id=thread.id,
-        order="desc",
-        limit=1    # Change it to 2 if you want the user message also
-    )
-    messages_list = list(new_messages)
-    if not messages_list:
-        return None
-    return messages_list[0]
-
-
-def get_full_response(thread):
-    """
-    Returns the full list of messages (in ascending order) from the thread.
-    """
-    return client.beta.threads.messages.list(thread_id=thread.id, order="asc")
-
-
-def pretty_print(message, enable_tts: bool = False):
-    """
-    Prints the last assistant message. If enable_tts is True,
-    uses macOS 'say' command for TTS (adjust if on another OS).
-    """
-    if not message:
-        return
-    role = message.role
-    content = message.content[0].text.value
-
-    print(f"{role}: {content}")
-
-    if enable_tts and role == "assistant":
-        os.system(f'say -v "{VOICE_TTS}" "{content}"')
-
-
-# ========= Audio Helpers =========
-def milliseconds_until_sound(sound, silence_threshold_in_decibels=-30.0, chunk_size=10) -> int:
-    """
-    Returns the number of milliseconds until sound above the threshold is detected.
-    """
-    trim_ms = 0  # in milliseconds
-    # to avoid infinite loop, ensure chunk_size > 0
-    assert chunk_size > 0, "Chunk size must be positive."
-
-    while trim_ms < len(sound):
-        segment = sound[trim_ms: trim_ms + chunk_size]
-        if segment.dBFS >= silence_threshold_in_decibels:
-            break
-        trim_ms += chunk_size
-
-    return trim_ms
-
-
-def openai_transcribe_audio(filepath: str) -> str:
-    """
-    Trims leading silence from the audio at `filepath` and
-    transcribes the result using OpenAI's Whisper.
-    """
-    audio = AudioSegment.from_file(filepath)
-    start_trim = milliseconds_until_sound(audio)
-    trimmed = audio[start_trim:]
-    trimmed.export("/tmp/trimmed.wav", format="wav")
-
-    with open("/tmp/trimmed.wav", "rb") as audio_data:
-        transcription = client.audio.transcriptions.create(
-            model="whisper-1",
-            file=audio_data
-        )
-    return transcription.text
 
 
 # ========= Main Logic =========
@@ -165,9 +41,9 @@ def assistant_process(shared_queue, message_queue, signal_queue):
                 current_name = new_name
 
                 if current_name not in name_to_thread:
-                    thread, run = create_thread_and_run(f"Hi, my name is {current_name}")
-                    wait_on_run(run, thread)
-                    pretty_print(get_response(thread))
+                    thread, run = create_thread_and_run(client, ASSISTANT_ID, f"Hi, my name is {current_name}")
+                    wait_on_run(client, run, thread)
+                    pretty_print(VOICE_TTS, get_response(client, thread))
                     name_to_thread[current_name] = thread
                 else:
                     print(f"Resuming conversation with {current_name}")
@@ -184,13 +60,13 @@ def assistant_process(shared_queue, message_queue, signal_queue):
             if current_name:
                 if current_name not in name_to_thread:
                     # Safety check (should rarely happen)
-                    thread, run = create_thread_and_run(user_message)
+                    thread, run = create_thread_and_run(client, ASSISTANT_ID, user_message)
                     name_to_thread[current_name] = thread
                 else:
                     thread = name_to_thread[current_name]
-                    run = continue_thread_and_run(thread, user_message)
-                wait_on_run(run, thread)
-                pretty_print(get_response(thread))
+                    run = continue_thread_and_run(client, ASSISTANT_ID, thread, user_message)
+                wait_on_run(client, run, thread)
+                pretty_print(VOICE_TTS, get_response(client, thread))
 
             # ========= Unused code for now =========
             # ========= Code for guests (Unrecognized people) =========
@@ -222,9 +98,9 @@ def assistant_process(shared_queue, message_queue, signal_queue):
                     current_name = new_name
 
                     if current_name not in name_to_thread:
-                        thread, run = create_thread_and_run(f"Hi, my name is {current_name}")
-                        wait_on_run(run, thread)
-                        pretty_print(get_response(thread), enable_tts=True)
+                        thread, run = create_thread_and_run(client, ASSISTANT_ID, f"Hi, my name is {current_name}")
+                        wait_on_run(client, run, thread)
+                        pretty_print(VOICE_TTS, get_response(client, thread), enable_tts=True)
                         name_to_thread[current_name] = thread
                     else:
                         print(f"Resuming conversation with {current_name}")
@@ -253,13 +129,13 @@ def assistant_process(shared_queue, message_queue, signal_queue):
                 if current_name:
                     if current_name not in name_to_thread:
                         # Safety check (should rarely happen)
-                        thread, run = create_thread_and_run(user_message)
+                        thread, run = create_thread_and_run(client, ASSISTANT_ID, user_message)
                         name_to_thread[current_name] = thread
                     else:
                         thread = name_to_thread[current_name]
-                        run = continue_thread_and_run(thread, user_message)
-                    wait_on_run(run, thread)
-                    pretty_print(get_response(thread), enable_tts=True)
+                        run = continue_thread_and_run(client, ASSISTANT_ID, thread, user_message)
+                    wait_on_run(client, run, thread)
+                    pretty_print(VOICE_TTS, get_response(client, thread), enable_tts=True)
 
                     # ========= Unused code for now =========
                     # ========= Code for guests (Unrecognized people) =========
