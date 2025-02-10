@@ -1,5 +1,4 @@
 from openai import OpenAI
-import whisper
 import os
 import speech_recognition as sr
 from dotenv import load_dotenv
