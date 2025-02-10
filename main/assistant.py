@@ -6,13 +6,14 @@ from dotenv import load_dotenv
 from chat.response import get_response, pretty_print
 from chat.runs import wait_on_run
 from chat.threads import create_thread_and_run, continue_thread_and_run
+from chat.tts import openai_transcribe_audio
 
 # ========= Constants =========
 load_dotenv()
 API_KEY = os.getenv("OPENAI_API_KEY")
 ASSISTANT_ID = os.getenv("ASSISTANT_KEY")
 VOICE_TTS = "Ava (Premium)"  # e.g., "Samantha", "Ava (Premium)"
-ONLY_TEXT = True  # Set to True for text-only interaction
+ONLY_TEXT = False  # Set to True for text-only interaction
 
 # ========= Initialize OpenAI Client =========
 client = OpenAI(api_key=API_KEY)
@@ -22,7 +23,7 @@ client = OpenAI(api_key=API_KEY)
 def assistant_process(shared_queue, message_queue, signal_queue):
     print("[Assistant] Starting assistant process...")
 
-    # new_thread = True
+    # new_thread= True
     # thread = None
 
     name_to_thread = {}
@@ -82,7 +83,7 @@ def assistant_process(shared_queue, message_queue, signal_queue):
             '''
     else:
         # Speech loop
-        model = whisper.load_model("base.en")
+        # model = whisper.load_model("base.en")
         recognizer = sr.Recognizer()
         mic = sr.Microphone()
 
@@ -116,8 +117,12 @@ def assistant_process(shared_queue, message_queue, signal_queue):
 
                 # Transcribe using local Whisper model (faster on GPU) or OpenAI's API
                 print("Transcribing...")
+                result = openai_transcribe_audio(client, "./temp.wav")
+                user_message = result
+                '''
                 result = model.transcribe("temp.wav")
                 user_message = result["text"].strip()
+                '''
 
                 if not user_message:
                     print("Nothing said...")
