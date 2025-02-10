@@ -3,6 +3,7 @@ import time
 import socket
 import os
 import csv
+import random
 import traceback
 from vision.gaze import gaze
 from vision.detector import detect_people
@@ -54,6 +55,7 @@ column_names = [
 
 def vision_process(shared_queue):
     # Main loop
+    current_selected_name = None
     try:
         while cap.isOpened():
             ret, frame = cap.read()
@@ -71,6 +73,9 @@ def vision_process(shared_queue):
 
             # Get image dimensions
             height_frame, width_frame = frame.shape[:2]
+
+            recognized_names = set()
+            recognized_names.clear()
 
             for track in tracked_objects:
                 if not track.is_confirmed() or track.time_since_update > 1:
@@ -94,11 +99,11 @@ def vision_process(shared_queue):
                     if name != "":
                         track_id_to_name[track_id] = name
 
-                name = track_id_to_name.get(track_id, "")
-
                 # Draw bounding box
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 cv2.putText(frame, f"ID: {track_id}", (x1, y1 - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+                name = track_id_to_name.get(track_id, "")
 
                 # Display the name if recognized
                 if name != "":
@@ -106,7 +111,18 @@ def vision_process(shared_queue):
                     cv2.putText(frame, name, (x1 + (x2 - x1) // 2 - text_size[0] // 2, y1 - 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
                     # print(f"[Vision] Detected: {name}")
-                    shared_queue.put(name)
+                    recognized_names.add(name)
+
+            if recognized_names:
+                # If the current selected name is not present, choose a new one.
+                if current_selected_name not in recognized_names:
+                    # You can choose the first one, or use random.choice(list(recognized_names))
+                    current_selected_name = random.choice(list(recognized_names))
+                    shared_queue.put(current_selected_name)
+
+            else:
+                # Clear selection when no names are recognized
+                current_selected_name = None
 
             # Process the frame with Face Mesh
             results_mesh = face_mesh.process(rgb_frame)

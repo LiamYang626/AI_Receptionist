@@ -143,52 +143,67 @@ def openai_transcribe_audio(filepath: str) -> str:
 
 
 # ========= Main Logic =========
-def assistant_process(shared_queue, message_queue, ask_queue):
-    new_thread = True
-    thread = None
+def assistant_process(shared_queue, message_queue, signal_queue):
+    print("[Assistant] Starting assistant process...")
+
+    # new_thread = True
+    # thread = None
 
     name_to_thread = {}
-
-    print("[Assistant] Starting assistant process...")
+    current_name = None
 
     if ONLY_TEXT:
         # Text-only loop
         while True:
-            name = shared_queue.get()
+            new_name = ""
+            if not current_name or not shared_queue.empty():
+                new_name = shared_queue.get().strip()
 
-            if name not in name_to_thread:
-                # Create a new conversation thread for this name
-                thread, run = create_thread_and_run(f"Hi, my name is {name}")
-                wait_on_run(run, thread)
+            if new_name != "" and new_name != current_name:
+                if current_name:
+                    print(f"Switching conversation to new recognized person: {new_name}")
+                current_name = new_name
 
-                # Retrieve assistant's response
-                messages = get_response(thread)
+                if current_name not in name_to_thread:
+                    thread, run = create_thread_and_run(f"Hi, my name is {current_name}")
+                    wait_on_run(run, thread)
+                    pretty_print(get_response(thread))
+                    name_to_thread[current_name] = thread
+                else:
+                    print(f"Resuming conversation with {current_name}")
 
-                # Print & TTS the assistant's greeting (which should address the name)
-                pretty_print(messages)
+            # Notify that the assistant is ready for input.
+            signal_queue.put("received")
 
-                # Store this so future messages for the same name can continue
-                name_to_thread[name] = (thread, run)
-                new_thread = False
-                ask_queue.put("received")
+            user_message = message_queue.get().strip()
 
-            message = message_queue.get()
-
-            if not message.strip():
+            if not user_message:
                 continue
 
+            # Continue the conversation with the current active thread.
+            if current_name:
+                if current_name not in name_to_thread:
+                    # Safety check (should rarely happen)
+                    thread, run = create_thread_and_run(user_message)
+                    name_to_thread[current_name] = thread
+                else:
+                    thread = name_to_thread[current_name]
+                    run = continue_thread_and_run(thread, user_message)
+                wait_on_run(run, thread)
+                pretty_print(get_response(thread))
+
+            # ========= Unused code for now =========
+            # ========= Code for guests (Unrecognized people) =========
+            '''
             if new_thread:
-                thread, run = create_thread_and_run(message)
+                thread, run = create_thread_and_run(user_message)
                 new_thread = False
             else:
-                run = continue_thread_and_run(thread, message)
+                run = continue_thread_and_run(thread, user_message)
 
-            print("sending message")
             wait_on_run(run, thread)
             pretty_print(get_response(thread))
-
-            ask_queue.put("received")
-
+            '''
     else:
         # Speech loop
         model = whisper.load_model("base.en")
@@ -197,6 +212,20 @@ def assistant_process(shared_queue, message_queue, ask_queue):
 
         while True:
             try:
+                new_name = shared_queue.get().strip()
+
+                if new_name != current_name:
+                    print(f"Switching conversation to new recognized person: {new_name}")
+                    current_name = new_name
+
+                    if current_name not in name_to_thread:
+                        thread, run = create_thread_and_run(f"Hi, my name is {current_name}")
+                        wait_on_run(run, thread)
+                        pretty_print(get_response(thread), enable_tts=True)
+                        name_to_thread[current_name] = thread
+                    else:
+                        print(f"Resuming conversation with {current_name}")
+
                 print("Listening...")
                 with mic as source:
                     recognizer.adjust_for_ambient_noise(source)
@@ -209,22 +238,38 @@ def assistant_process(shared_queue, message_queue, ask_queue):
                 # Transcribe using local Whisper model (faster on GPU) or OpenAI's API
                 print("Transcribing...")
                 result = model.transcribe("temp.wav")
-                message = result["text"].strip()
+                user_message = result["text"].strip()
 
-                if not message:
+                if not user_message:
                     print("Nothing said...")
                     continue
 
-                print(f"You said: {message}")
+                print(f"You said: {user_message}")
 
-                if new_thread:
-                    thread, run = create_thread_and_run(message)
-                    new_thread = False
-                else:
-                    run = continue_thread_and_run(thread, message)
+                # Continue the conversation with the current active thread.
+                if current_name:
+                    if current_name not in name_to_thread:
+                        # Safety check (should rarely happen)
+                        thread, run = create_thread_and_run(user_message)
+                        name_to_thread[current_name] = thread
+                    else:
+                        thread = name_to_thread[current_name]
+                        run = continue_thread_and_run(thread, user_message)
+                    wait_on_run(run, thread)
+                    pretty_print(get_response(thread), enable_tts=True)
 
-                wait_on_run(run, thread)
-                pretty_print(get_response(thread), enable_tts=True)
+                    # ========= Unused code for now =========
+                    # ========= Code for guests (Unrecognized people) =========
+                    '''
+                    if new_thread:
+                        thread, run = create_thread_and_run(user_message)
+                        new_thread = False
+                    else:
+                        run = continue_thread_and_run(thread, user_message)
+            
+                    wait_on_run(run, thread)
+                    pretty_print(get_response(thread), enable_tts=True)
+                    '''
 
             except sr.WaitTimeoutError:
                 print("Listening timed out. Try speaking again.")

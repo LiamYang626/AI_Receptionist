@@ -25,7 +25,7 @@ def recognizing_face(frame_people, encode_list, face_names, threshold=0.4, margi
     encode_face_lists = face_recognition.face_encodings(frame_people, frame_face)
 
     if not encode_face_lists:  # Check if no face encodings were found
-        print("No face encodings detected in the frame.")
+        # print("No face encodings detected in the frame.")
         return ""
 
     encode_face = encode_face_lists[0]
