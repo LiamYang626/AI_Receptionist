@@ -1,6 +1,13 @@
 $(document).ready(function () {
 
 
+    // Display Speak Message
+    eel.expose(DisplayText)
+    function DisplayText(message) {
+        $(".tlt li:first").text(message);
+        $('.tlt').textillate('start');
+    }
+
 
     // Display Speak Message
     eel.expose(DisplayMessage)
@@ -48,24 +55,17 @@ $(document).ready(function () {
         }
         
     }
-
+    
     
     // Hide Loader and display Face Auth animation
     eel.expose(hideLoader)
     function hideLoader() {
 
         $("#Loader").attr("hidden", true);
-        $("#FaceAuth").attr("hidden", false);
-
-    }
-    // Hide Face auth and display Face Auth success animation
-    eel.expose(hideFaceAuth)
-    function hideFaceAuth() {
-
-        $("#FaceAuth").attr("hidden", true);
         $("#FaceAuthSuccess").attr("hidden", false);
 
     }
+ 
     // Hide success and display 
     eel.expose(hideFaceAuthSuccess)
     function hideFaceAuthSuccess() {
@@ -80,8 +80,6 @@ $(document).ready(function () {
     eel.expose(hideStart)
     function hideStart() {
 
-        $("#Start").attr("hidden", true);
-
         setTimeout(function () {
             $("#Oval").addClass("animate__animated animate__zoomIn");
 
@@ -90,6 +88,5 @@ $(document).ready(function () {
             $("#Oval").attr("hidden", false);
         }, 1000)
     }
-
 
 });

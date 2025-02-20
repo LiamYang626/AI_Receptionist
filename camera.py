@@ -12,8 +12,8 @@ from vision.recognition import encode_file, recognizing_face
 from vision.utils import initialize_object_detector, initialize_face_detector, initialize_landmark_detector
 # from vision.visualization import draw_bounding_box
 
-fileEncodingsName = '../models/encodings-everyone-2023-11-30-17-50-53-weekofcode2324.dat'
-filePersonsNames = '../models/persons-everyone-2023-11-30-17-50-53-weekofcode2324.dat'
+fileEncodingsName = 'models/encodings-everyone-2023-11-30-17-50-53-weekofcode2324.dat'
+filePersonsNames = 'models/persons-everyone-2023-11-30-17-50-53-weekofcode2324.dat'
 encodeListKnown, classNames = encode_file(fileEncodingsName, filePersonsNames)
 
 # Set up the Face Mesh with refine_landmarks=True to get iris landmarks
@@ -26,7 +26,7 @@ face_detector = initialize_face_detector()
 model = initialize_object_detector()
 
 # Command-line arguments for camera source
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 # Initialize DeepSORT tracker
 deepsort = initialize_deepsort()

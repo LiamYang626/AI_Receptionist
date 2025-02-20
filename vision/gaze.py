@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
-from vision.helpers import relative, relativeT
+
+
+relative = lambda landmark, shape: (int(landmark.x * shape[1]), int(landmark.y * shape[0]))
+relativeT = lambda landmark, shape: (int(landmark.x * shape[1]), int(landmark.y * shape[0]), 0)
 
 
 def gaze(frame, points):

@@ -1,4 +1,6 @@
 import os
+import eel
+from .connect import *
 
 
 def get_response(client, thread):
@@ -31,9 +33,19 @@ def pretty_print(voice_tts, message, enable_tts: bool = False):
     if not message:
         return
     role = message.role
-    content = message.content[0].text.value
-
-    print(f"{role}: {content}")
+    content = str(message.content[0].text.value)
 
     if enable_tts and role == "assistant":
         os.system(f'say -v "{voice_tts}" "{content}"')
+        speak(content)
+        print("said")
+
+    elif role == "assistant":
+        display(content)
+        print("displayed")
+
+    else: 
+        eel.senderText(content)
+        print("sent")
+    
+    print(f"{role}: {content}")

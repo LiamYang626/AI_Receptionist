@@ -2,7 +2,8 @@ $(document).ready(function () {
 
     eel.init()()
 
-    $('.text').textillate({
+
+    $('.tlt').textillate({
         loop: true,
         sync: true,
         in: {
@@ -42,34 +43,32 @@ $(document).ready(function () {
 
     // mic button click event
 
-    $("#MicBtn").click(function () { 
-        eel.playAssistantSound()
+    $("#MicBtn").click(function () {
+        eel.toggle_mode("voice"); 
         $("#Oval").attr("hidden", true);
         $("#SiriWave").attr("hidden", false);
-        eel.allCommands()()
     });
 
+    // Listen for microphone button
+    document.getElementById('MicBtn').addEventListener('click', () => {
+        // Your mic handling code
+    });
 
-    function doc_keyUp(e) {
-        // this would test for whichever key is 40 (down arrow) and the ctrl key at the same time
-
-        if (e.key === 'j' && e.metaKey) {
-            eel.playAssistantSound()
-            $("#Oval").attr("hidden", true);
-            $("#SiriWave").attr("hidden", false);
-            eel.allCommands()()
+    // Listen for send button 
+    document.getElementById('SendBtn').addEventListener('click', () => {
+        const chatbox = document.getElementById('chatbox');
+        if (chatbox.value.trim()) {
+            eel.toggle_mode("text");
+            eel.send_message(chatbox.value);
+            chatbox.value = '';
         }
-    }
-    document.addEventListener('keyup', doc_keyUp, false);
+    });
 
     // to play assisatnt 
     function PlayAssistant(message) {
 
         if (message != "") {
 
-            $("#Oval").attr("hidden", true);
-            $("#SiriWave").attr("hidden", false);
-            eel.allCommands(message);
             $("#chatbox").val("")
             $("#MicBtn").attr('hidden', false);
             $("#SendBtn").attr('hidden', true);
@@ -89,7 +88,7 @@ $(document).ready(function () {
             $("#SendBtn").attr('hidden', false);
         }
     }
-
+    
     // key up event handler on text box
     $("#chatbox").keyup(function () {
 
@@ -98,6 +97,14 @@ $(document).ready(function () {
     
     });
     
+    // send button event handler
+    $("#SendBtn").click(function () {
+    
+        let message = $("#chatbox").val()
+        PlayAssistant(message)
+    
+    });
+
     // send button event handler
     $("#SendBtn").click(function () {
     
