@@ -22,18 +22,3 @@ def get_full_response(client, thread):
     """
     return client.beta.threads.messages.list(thread_id=thread.id, order="asc")
 
-
-def pretty_print(voice_tts, message, enable_tts: bool = False):
-    """
-    Prints the last assistant message. If enable_tts is True,
-    uses macOS 'say' command for TTS (adjust if on another OS).
-    """
-    if not message:
-        return
-    role = message.role
-    content = message.content[0].text.value
-
-    print(f"{role}: {content}")
-
-    if enable_tts and role == "assistant":
-        os.system(f'say -v "{voice_tts}" "{content}"')

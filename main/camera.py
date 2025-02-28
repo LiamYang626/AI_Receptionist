@@ -26,7 +26,7 @@ face_detector = initialize_face_detector()
 model = initialize_object_detector()
 
 # Command-line arguments for camera source
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 # Initialize DeepSORT tracker
 deepsort = initialize_deepsort()

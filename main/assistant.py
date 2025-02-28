@@ -1,8 +1,11 @@
 from openai import OpenAI
 import os
+import subprocess
+import tempfile
+import time
 import speech_recognition as sr
 from dotenv import load_dotenv
-from chat.response import get_response, pretty_print
+from chat.response import get_response
 from chat.runs import wait_on_run
 from chat.threads import create_thread_and_run, continue_thread_and_run
 from chat.tts import openai_transcribe_audio
@@ -17,9 +20,59 @@ ONLY_TEXT = False  # Set to True for text-only interaction
 # ========= Initialize OpenAI Client =========
 client = OpenAI(api_key=API_KEY)
 
+# ========= Global Log Capture =========
+output_logs = []  # Global list to capture printed output
+import builtins
+original_print = print
+def new_print(*args, **kwargs):
+    message = " ".join(str(arg) for arg in args)
+    output_logs.append(message)
+    original_print(*args, **kwargs)
+print = new_print
+
+
+def generate_tts_aiff(voice, text, output_path):
+    """
+    Generate an AIFF file using the macOS 'say' command.
+    """
+    cmd = f'say -v "{voice}" -o "{output_path}" "{text}"'
+    os.system(cmd)
+
+def convert_aiff_to_wav(aiff_path, wav_path):
+    """
+    Convert AIFF to WAV using the macOS afconvert tool.
+    """
+    cmd = f'afconvert -f WAVE -d LEI16 "{aiff_path}" "{wav_path}"'
+    subprocess.run(cmd, shell=True, check=True)
+
+
+def pretty_print(voice_tts, message, enable_tts: bool = False):
+    """
+    Prints the last assistant message. If enable_tts is True,
+    uses macOS 'say' command for TTS (adjust if on another OS).
+    """
+    if not message:
+        return
+    role = message.role
+    content = message.content[0].text.value
+
+    print(f"{role}: {content}")
+
+    '''
+    if enable_tts and role == "assistant":
+        os.system(f'say -v "{voice_tts}" "{content}"')
+    '''
+    return content
+
+
+def wait_for_tts_finish(speaking_flag):
+    """Wait until speaking_flag is reset to False."""
+    while speaking_flag.value:
+        time.sleep(0.1)
+
 
 # ========= Main Logic =========
-def assistant_process(shared_queue, message_queue, signal_queue):
+def assistant_process(shared_queue, message_queue, signal_queue, viz_queue, speaking_flag):
     print("[Assistant] Starting assistant process...")
 
     # new_thread= True
@@ -98,14 +151,25 @@ def assistant_process(shared_queue, message_queue, signal_queue):
                     current_name = new_name
 
                     if current_name not in name_to_thread:
+                        signal_queue.put("Initializing...")
                         thread, run = create_thread_and_run(client, ASSISTANT_ID, f"Hi, my name is {current_name}")
                         wait_on_run(client, run, thread)
-                        pretty_print(VOICE_TTS, get_response(client, thread), enable_tts=True)
+                        message = pretty_print(VOICE_TTS, get_response(client, thread), enable_tts=True)
+                        with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as tmp_aiff:
+                            aiff_path = tmp_aiff.name
+                        generate_tts_aiff(VOICE_TTS, message, aiff_path)
+
+                        # 2. Convert the AIFF to WAV format
+                        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_wav:
+                            wav_path = tmp_wav.name
+                        convert_aiff_to_wav(aiff_path, wav_path)
+                        viz_queue.put((wav_path, message))
                         name_to_thread[current_name] = thread
                     else:
                         print(f"Resuming conversation with {current_name}")
 
                 print("Listening...")
+                signal_queue.put("Listening...")
                 with mic as source:
                     recognizer.adjust_for_ambient_noise(source)
                     audio_data = recognizer.listen(source, timeout=5)
@@ -119,7 +183,7 @@ def assistant_process(shared_queue, message_queue, signal_queue):
                 result = openai_transcribe_audio(client, "./temp.wav")
                 user_message = result
                 '''
-                result = model.transcribe("temp.wav")
+                result = model.transcribe("temp_mic.wav")
                 user_message = result["text"].strip()
                 '''
 
@@ -128,6 +192,7 @@ def assistant_process(shared_queue, message_queue, signal_queue):
                     continue
 
                 print(f"You said: {user_message}")
+                signal_queue.put("Processing...")
 
                 # Continue the conversation with the current active thread.
                 if current_name:
@@ -139,7 +204,18 @@ def assistant_process(shared_queue, message_queue, signal_queue):
                         thread = name_to_thread[current_name]
                         run = continue_thread_and_run(client, ASSISTANT_ID, thread, user_message)
                     wait_on_run(client, run, thread)
-                    pretty_print(VOICE_TTS, get_response(client, thread), enable_tts=True)
+                    message = pretty_print(VOICE_TTS, get_response(client, thread), enable_tts=True)
+                    with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as tmp_aiff:
+                        aiff_path = tmp_aiff.name
+                    generate_tts_aiff(VOICE_TTS, message, aiff_path)
+
+                    # 2. Convert the AIFF to WAV format
+                    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_wav:
+                        wav_path = tmp_wav.name
+                    convert_aiff_to_wav(aiff_path, wav_path)
+                    speaking_flag.value = True
+                    viz_queue.put((wav_path, message))
+                    wait_for_tts_finish(speaking_flag)
 
                     # ========= Unused code for now =========
                     # ========= Code for guests (Unrecognized people) =========
