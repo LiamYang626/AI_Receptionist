@@ -36,7 +36,7 @@ def recognizing_face(frame_people, encode_list, face_names, threshold=0.4, margi
     top_5_indices = top_5_indices_not_sorted[np.argsort(face_dis[top_5_indices_not_sorted])]
 
     # Debugging
-    # print(top_5_indices)
+    print(top_5_indices)
 
     min_dis_index = top_5_indices[0]
 
