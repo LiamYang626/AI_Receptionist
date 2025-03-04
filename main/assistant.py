@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 import time
 import speech_recognition as sr
+import whisper
 from dotenv import load_dotenv
 from chat.response import get_response
 from chat.runs import wait_on_run
@@ -80,6 +81,7 @@ def assistant_process(shared_queue, message_queue, signal_queue, viz_queue, spea
 
     name_to_thread = {}
     current_name = None
+    model = whisper.load_model("base.en")
 
     if ONLY_TEXT:
         # Text-only loop
@@ -144,6 +146,9 @@ def assistant_process(shared_queue, message_queue, signal_queue, viz_queue, spea
                 new_name = ""
                 if not current_name or not shared_queue.empty():
                     new_name = shared_queue.get().strip()
+                    if new_name == "detected_none":
+                        signal_queue.put("No Person Detected")
+                        continue
 
                 if new_name != "" and new_name != current_name:
                     if current_name:
@@ -172,7 +177,7 @@ def assistant_process(shared_queue, message_queue, signal_queue, viz_queue, spea
                 signal_queue.put("Listening...")
                 with mic as source:
                     recognizer.adjust_for_ambient_noise(source)
-                    audio_data = recognizer.listen(source, timeout=5)
+                    audio_data = recognizer.listen(source, timeout=4)
 
                 # Save audio to file
                 with open("temp.wav", "wb") as f:
@@ -180,11 +185,11 @@ def assistant_process(shared_queue, message_queue, signal_queue, viz_queue, spea
 
                 # Transcribe using local Whisper model (faster on GPU) or OpenAI's API
                 print("Transcribing...")
+                result = model.transcribe("./temp.wav")
+                user_message = result["text"].strip()
+                '''
                 result = openai_transcribe_audio(client, "./temp.wav")
                 user_message = result
-                '''
-                result = model.transcribe("temp_mic.wav")
-                user_message = result["text"].strip()
                 '''
 
                 if not user_message:

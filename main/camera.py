@@ -68,6 +68,9 @@ def vision_process(shared_queue):
 
             detection = detect_people(model, frame)
 
+            if not detection:
+                shared_queue.put("detected_none")
+
             # Pass detection results to DeepSORT and track
             tracked_objects = track_objects(deepsort, detection, frame=frame)
 

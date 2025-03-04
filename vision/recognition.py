@@ -22,6 +22,10 @@ def encode_file(encoding_file, name_file):
 
 def recognizing_face(frame_people, encode_list, face_names, threshold=0.4, margin=0.01):
     frame_face = face_recognition.face_locations(frame_people, model="hog")
+
+    if frame_face is None or len(frame_face) == 0:
+        frame_face = face_recognition.face_locations(frame_people, model="cnn") #slower
+
     encode_face_lists = face_recognition.face_encodings(frame_people, frame_face)
 
     if not encode_face_lists:  # Check if no face encodings were found
@@ -35,10 +39,12 @@ def recognizing_face(frame_people, encode_list, face_names, threshold=0.4, margi
 
     top_5_indices = top_5_indices_not_sorted[np.argsort(face_dis[top_5_indices_not_sorted])]
 
-    # Debugging
-    # print(top_5_indices)
-
     min_dis_index = top_5_indices[0]
+
+    # Debugging
+    for i in top_5_indices[0:]:
+        print(str(face_names[i]) + ": " + str(face_dis[i]))
+    print("\r")
 
     second_dis_index = None
     for i in top_5_indices[1:]:  # Skip the first one, look for second distinct match
