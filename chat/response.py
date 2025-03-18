@@ -1,6 +1,6 @@
 import os
-import eel
 from .connect import *
+
 
 
 def get_response(client, thread):
@@ -25,7 +25,7 @@ def get_full_response(client, thread):
     return client.beta.threads.messages.list(thread_id=thread.id, order="asc")
 
 
-def pretty_print(voice_tts, message, enable_tts: bool = False):
+def pretty_print(voice_tts, message, enable_tts: bool = True):
     """
     Prints the last assistant message. If enable_tts is True,
     uses macOS 'say' command for TTS (adjust if on another OS).
@@ -36,16 +36,11 @@ def pretty_print(voice_tts, message, enable_tts: bool = False):
     content = str(message.content[0].text.value)
 
     if enable_tts and role == "assistant":
-        os.system(f'say -v "{voice_tts}" "{content}"')
-        speak(content)
-        print("said")
+        # os.system(f'say -v "{voice_tts}" "{content}"')
+        pass
 
-    elif role == "assistant":
-        display(content)
-        print("displayed")
+    log_message = f"{role}: {content}"
+    print(log_message)
 
-    else: 
-        eel.senderText(content)
-        print("sent")
-    
-    print(f"{role}: {content}")
+    # Create a structured dictionary message.
+    return {"action": "DisplayMessage", "text": log_message}

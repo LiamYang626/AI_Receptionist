@@ -1,129 +1,104 @@
-$(document).ready(function () {
+// main.js
+$(document).ready(function(){
+  // Initialize textillate for the main text element.
+  $('.tlt').textillate({
+    loop: true,
+    sync: true,
+    in: { effect: "bounceIn" },
+    out: { effect: "bounceOut" }
+  });
 
-    eel.init()()
+  // Initialize SiriWave.
+  var siriWave = new SiriWave({
+    container: document.getElementById("siri-container"),
+    width: 800,
+    height: 200,
+    style: "ios9",
+    amplitude: 1,
+    speed: 0.30,
+    autostart: true
+  });
 
+  // Initialize textillate for the Siri message.
+  $('.siri-message').textillate({
+    loop: true,
+    sync: true,
+    in: { effect: "fadeInUp", sync: true },
+    out: { effect: "fadeOutUp", sync: true }
+  });
 
-    $('.tlt').textillate({
-        loop: true,
-        sync: true,
-        in: {
-            effect: "bounceIn",
-        },
-        out: {
-            effect: "bounceOut",
-        },
+  // Establish a WebSocket connection with the FastAPI server.
+  const ws = new WebSocket("ws://localhost:5500/ws");
 
-    });
+  ws.onopen = function() {
+    console.log("WebSocket connected.");
+  };
 
-    // Siri configuration
-    var siriWave = new SiriWave({
-        container: document.getElementById("siri-container"),
-        width: 800,
-        height: 200,
-        style: "ios9",
-        amplitude: "1",
-        speed: "0.30",
-        autostart: true
-      });
-
-    // Siri message animation
-    $('.siri-message').textillate({
-        loop: true,
-        sync: true,
-        in: {
-            effect: "fadeInUp",
-            sync: true,
-        },
-        out: {
-            effect: "fadeOutUp",
-            sync: true,
-        },
-
-    });
-
-    // mic button click event
-
-    $("#MicBtn").click(function () {
-        eel.toggle_mode("voice"); 
-        $("#Oval").attr("hidden", true);
-        $("#SiriWave").attr("hidden", false);
-    });
-
-    // Listen for microphone button
-    document.getElementById('MicBtn').addEventListener('click', () => {
-        // Your mic handling code
-    });
-
-    // Listen for send button 
-    document.getElementById('SendBtn').addEventListener('click', () => {
-        const chatbox = document.getElementById('chatbox');
-        if (chatbox.value.trim()) {
-            eel.toggle_mode("text");
-            eel.send_message(chatbox.value);
-            chatbox.value = '';
-        }
-    });
-
-    // to play assisatnt 
-    function PlayAssistant(message) {
-
-        if (message != "") {
-
-            $("#chatbox").val("")
-            $("#MicBtn").attr('hidden', false);
-            $("#SendBtn").attr('hidden', true);
-
-        }
-
+  ws.onmessage = function(event) {
+    const message = JSON.parse(event.data);
+    console.log("Received message:", message);
+    // Update the UI based on the action.
+    if(message.action === "DisplayText") {
+      $('.text-light.tlt.text-center').replaceWith(message.text);
+      $('.text-light.tlt.text-center').textillate('start');
+    } else if(message.action === "DisplayMessage") {
+      $(".siri-message").replaceWith(message.text);
+      $('.siri-message').textillate('start');
+    } else if(message.action === "senderText") {
+      var chatBox = document.getElementById("chat-canvas-body");
+      chatBox.innerHTML += `<div class="row justify-content-end mb-4">
+        <div class="width-size">
+          <div class="sender_message">${message.text}</div>
+        </div>
+      </div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    } else if(message.action === "receiverText") {
+      var chatBox = document.getElementById("chat-canvas-body");
+      chatBox.innerHTML += `<div class="row justify-content-start mb-4">
+        <div class="width-size">
+          <div class="receiver_message">${message.text}</div>
+        </div>
+      </div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
+  };
 
-    // toogle fucntion to hide and display mic and send button 
-    function ShowHideButton(message) {
-        if (message.length == 0) {
-            $("#MicBtn").attr('hidden', false);
-            $("#SendBtn").attr('hidden', true);
-        }
-        else {
-            $("#MicBtn").attr('hidden', true);
-            $("#SendBtn").attr('hidden', false);
-        }
+  ws.onclose = function() {
+    console.log("WebSocket connection closed.");
+  };
+
+  // Mic button: switch UI to voice mode.
+  $("#MicBtn").click(function(){
+    $("#Oval").attr("hidden", true);
+    $("#SiriWave").attr("hidden", false);
+    // Optionally send a command via ws.send() if needed.
+  });
+
+  // Send button: send user message.
+  $("#SendBtn").click(function(){
+    let userMessage = $("#chatbox").val();
+    if(userMessage.trim()){
+      ws.send(JSON.stringify({"action": "userMessage", "text": userMessage}));
+      $("#chatbox").val('');
     }
-    
-    // key up event handler on text box
-    $("#chatbox").keyup(function () {
+  });
 
-        let message = $("#chatbox").val();
-        ShowHideButton(message)
-    
-    });
-    
-    // send button event handler
-    $("#SendBtn").click(function () {
-    
-        let message = $("#chatbox").val()
-        PlayAssistant(message)
-    
-    });
+  // Toggle Send/Mic buttons based on text input.
+  $("#chatbox").on('keyup', function(){
+    let message = $(this).val();
+    if(message.length === 0){
+      $("#MicBtn").attr('hidden', false);
+      $("#SendBtn").attr('hidden', true);
+    } else {
+      $("#MicBtn").attr('hidden', true);
+      $("#SendBtn").attr('hidden', false);
+    }
+  });
 
-    // send button event handler
-    $("#SendBtn").click(function () {
-    
-        let message = $("#chatbox").val()
-        PlayAssistant(message)
-    
-    });
-    
-
-    // enter press event handler on chat box
-    $("#chatbox").keypress(function (e) {
-        key = e.which;
-        if (key == 13) {
-            let message = $("#chatbox").val()
-            PlayAssistant(message)
-        }
-    });
-
-
-
-
+  // Allow sending message on Enter key.
+  $("#chatbox").keypress(function(e){
+    if(e.which === 13){
+      $("#SendBtn").click();
+    }
+  });
 });

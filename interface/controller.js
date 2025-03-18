@@ -4,8 +4,9 @@ $(document).ready(function () {
     // Display Speak Message
     eel.expose(DisplayText)
     function DisplayText(message) {
-        $(".tlt li:first").text(message);
-        $('.tlt').textillate('start');
+        $('.text-light.tlt.text-center').text(message);
+        $('.text-light.tlt.text-center').textillate('start');
+        console.log(message);
     }
 
 
