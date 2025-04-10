@@ -20,7 +20,7 @@ def encode_file(encoding_file, name_file):
     return encoded_lists, name_lists
 
 
-def recognizing_face(frame_people, encode_list, face_names, threshold=0.4, margin=0.01):
+def recognizing_face(frame_people, encode_list, face_names, threshold=0.35, margin=0.02):
     frame_face = face_recognition.face_locations(frame_people, model="hog")
     encode_face_lists = face_recognition.face_encodings(frame_people, frame_face)
 
@@ -38,6 +38,7 @@ def recognizing_face(frame_people, encode_list, face_names, threshold=0.4, margi
 
     second_dis_index = None
     for i in top_5_indices[1:]:  # Skip the first one, look for second distinct match
+        # print(face_names[i], face_dis[i])
         if face_names[top_5_indices[0]] != face_names[i]:
             second_dis_index = i
             break

@@ -1,18 +1,14 @@
-# server.py
-import asyncio
-import threading
-import time
-import json
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import uvicorn
+import os
 
 app = FastAPI()
 
-app.mount("/Interface", StaticFiles(directory="Interface", html=True), name="static")
-
-# Allow all origins (for local testing)
+# CORS 설정 (개발 단계에서는 모든 origin 허용)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,58 +17,51 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Connection manager to keep track of active WebSocket connections.
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections = []
+# 메시지 모델 정의
+class Message(BaseModel):
+    text: str
 
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections.append(websocket)
+# 간단한 인메모리 메시지 저장소
+message_store = {"text": "Loading..."}
 
-    def disconnect(self, websocket: WebSocket):
-        if websocket in self.active_connections:
-            self.active_connections.remove(websocket)
+app.mount("/Interface", StaticFiles(directory="Interface", html=True), name="static")
 
-    async def broadcast(self, message: str):
-        for connection in self.active_connections:
-            try:
-                await connection.send_text(message)
-            except Exception as e:
-                print("Broadcast error:", e)
+@app.get("/")
+async def root():
+    return FileResponse("Interface/index.html")
 
+# 클라이언트가 GET 요청을 보내면 저장된 메시지를 반환
+@app.get("/message")
+def get_message():
+    return message_store
 
-manager = ConnectionManager()
+# 클라이언트가 POST 요청으로 메시지를 보내면 저장
+@app.post("/message")
+def post_message(message: Message):
+    message_store["text"] = message.text
+    return {"status": "ok", "text": message.text}
 
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
-    try:
-        while True:
-            # Optionally, handle messages from the client.
-            data = await websocket.receive_text()
-            await websocket.send_text(f"Server received: {data}")
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
-def ui_queue_listener(ui_queue, loop):
-    """Continuously poll the shared UI queue and broadcast messages to all WebSocket clients."""
-    while True:
-        if not ui_queue.empty():
-            message = ui_queue.get()
-            # Convert the structured message (a dict) to JSON.
-            message_str = json.dumps(message)
-            asyncio.run_coroutine_threadsafe(manager.broadcast(message_str), loop)
-        time.sleep(0.1)
+@app.post("/upload_audio")
+async def upload_audio(file: UploadFile = File(...)):
+    file_location = os.path.join(UPLOAD_DIR, "latest.wav")
+    with open(file_location, "wb") as buffer:
+        buffer.write(await file.read())
+    return {"status": "ok", "filename": "latest.wav"}
 
 
-def run_server(ui_queue):
-    # Get the current event loop from the main thread.
-    loop = asyncio.get_event_loop()
-    # Start the UI queue listener in a background thread.
-    thread = threading.Thread(target=ui_queue_listener, args=(ui_queue, loop), daemon=True)
-    thread.start()
-    # Run the FastAPI server.
-    uvicorn.run(app, host="127.0.0.1", port=5500)
+# WAV 파일을 반환하는 엔드포인트 (클라이언트가 음성을 재생할 때 사용)
+@app.get("/audio")
+async def get_audio():
+    file_location = os.path.join(UPLOAD_DIR, "latest.wav")
+    if not os.path.exists(file_location):
+        raise HTTPException(status_code=404, detail="Audio file not found")
+    return FileResponse(file_location, media_type="audio/wav", filename="latest.wav")
+
+
+# 서버 실행 (이 코드는 launcher.py에서 import 하여 run_server()로 호출할 수 있도록 만듭니다.)
+def run_server():
+    uvicorn.run("server:app", host="127.0.0.1", port=5500, reload=True)

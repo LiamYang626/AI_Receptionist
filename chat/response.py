@@ -38,9 +38,7 @@ def pretty_print(voice_tts, message, enable_tts: bool = True):
     if enable_tts and role == "assistant":
         # os.system(f'say -v "{voice_tts}" "{content}"')
         pass
-
-    log_message = f"{role}: {content}"
-    print(log_message)
-
+    
+    print(content)
     # Create a structured dictionary message.
-    return {"action": "DisplayMessage", "text": log_message}
+    return content
