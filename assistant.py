@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import subprocess
 import tempfile
+import requests
 
 # Import chat-related helper functions
 from chat.response import get_response, pretty_print
@@ -20,7 +21,6 @@ VOICE_TTS = "Ava (Premium)"      # Voice name for TTS output
 USE_LOCAL_MIC = True            # Toggle between backend mic vs. front-end input
 client = OpenAI(api_key=API_KEY)  # Initialize OpenAI client
 
-import requests
 
 def send_message_to_server(message_text):
     url = "http://127.0.0.1:5500/message"

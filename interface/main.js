@@ -43,13 +43,13 @@ $(document).ready(function(){
         console.log("Received message:", data.text);
         updateUI(data.text);
         currentMessage = data.text;
-      }
-      let audioPlayer = document.getElementById("audioPlayer");
-      if (audioPlayer) {
-        // URL에 타임스탬프를 덧붙여 캐시를 피합니다.
-        audioPlayer.src = "http://127.0.0.1:5500/audio";
-        // 오디오 자동 재생 (브라우저 정책에 따라 auto play가 안 될 수도 있으므로, play() 호출)
-        audioPlayer.play().catch(e => console.error("Audio play error:", e));
+        let audioPlayer = document.getElementById("audioPlayer");
+        if (audioPlayer) {
+          // URL에 타임스탬프를 덧붙여 캐시를 피합니다.
+          audioPlayer.src = "http://127.0.0.1:5500/audio";
+          // 오디오 자동 재생 (브라우저 정책에 따라 auto play가 안 될 수도 있으므로, play() 호출)
+          audioPlayer.play().catch(e => console.error("Audio play error:", e));
+        }
       }
       // 메시지를 수신하면 즉시 다음 메시지를 기다림 (롱 폴링)
       pollMessages();
