@@ -6,6 +6,7 @@ from openai import OpenAI
 import subprocess
 import tempfile
 import requests
+import whisper
 
 # Import chat-related helper functions
 from chat.response import get_response, pretty_print
@@ -27,10 +28,6 @@ def send_message_to_server(message_text):
     data = {"text": message_text}
     try:
         response = requests.post(url, json=data)
-        # 응답 상태 코드와 텍스트를 먼저 출력해보자.
-        print("HTTP status code:", response.status_code)
-        print("Raw response text:", response.text)
-        # 상태 코드가 200(성공)이 아니라면 에러 처리
         if response.status_code != 200:
             print("Error: Received non-200 status code")
             return
@@ -72,6 +69,21 @@ def convert_aiff_to_wav(aiff_path, wav_path):
     subprocess.run(cmd, shell=True, check=True)
 
 
+def wait_for_audio_finished():
+    # Poll the server every 1 second until it indicates that audio playback is complete.
+    while True:
+        try:
+            response = requests.get("http://127.0.0.1:5500/audio_finished")
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("audio_finished", False):
+                    print("[Assistant] Audio finished signal received.")
+                    break
+        except Exception as e:
+            print("[Assistant] Error polling audio finished status:", e)
+        time.sleep(1)
+
+
 def assistant_process(shared_queue):
 
     """Main loop for the AI assistant process."""
@@ -82,6 +94,8 @@ def assistant_process(shared_queue):
 
     recognizer = sr.Recognizer()
     mic = None
+    model = whisper.load_model("base.en")
+
     if USE_LOCAL_MIC:
         mic = sr.Microphone()
         # Calibrate once for ambient noise to improve recognition speed
@@ -116,8 +130,7 @@ def assistant_process(shared_queue):
                     response_message = get_response(client, thread)
                     # Format and send the assistant's response (text and audio) to UI
                     ui_message = pretty_print(VOICE_TTS, response_message)
-                    if ui_message:
-                        send_message_to_server(ui_message)
+                        
                     # Save the new thread for this person
                     name_to_thread[current_name] = thread
 
@@ -132,34 +145,35 @@ def assistant_process(shared_queue):
                     
                     send_wav_file_to_server(wav_path)
 
+                    send_message_to_server(ui_message)
+
                 else:
                     # Resume existing conversation thread for returning person
                     print(f"[Assistant] Resuming conversation with {current_name}")
                     thread = name_to_thread[current_name]
-                    # Notify UI that assistant is ready (if needed)
-                    ui_message = {"signal": "listening"}
-                    send_message_to_server(ui_message)
+                    send_message_to_server("Listening...")
 
-            # Signal the UI that the assistant is ready for the user's input (hands-free cue)
-            # ui_queue.put({"signal": "listening"})
-            time.sleep(100000)
+            wait_for_audio_finished()
+            send_message_to_server("Listening...")
 
             # Listen for the user's speech input
             user_message = ""
             if USE_LOCAL_MIC:
                 # Use backend microphone for voice input (if enabled)
                 with mic as source:
+                    recognizer.adjust_for_ambient_noise(source)
                     audio_data = recognizer.listen(source, timeout=3)
-                # Optionally save audio_data to file if needed for debugging
                 with open("temp.wav", "wb") as f:
                     f.write(audio_data.get_wav_data())
+                send_message_to_server("Transcribing...")
                 print("[Assistant] Transcribing speech...")
                 try:
-                    result = openai_transcribe_audio(client, audio_data)
+                    result = model.transcribe("temp.wav")
+                    # result = openai_transcribe_audio(client, audio_data)
                 except Exception as e:
                     print(f"[Assistant] Transcription error: {e}")
                     continue  # Skip to next loop iteration
-                user_message = result.strip()
+                user_message = result["text"].strip()
             else:
                 # Use message from front-end (if provided via WebSocket)
                 pass
@@ -168,7 +182,8 @@ def assistant_process(shared_queue):
                 print("[Assistant] No user message detected (silence or error).")
                 continue
 
-            print(f"[Assistant] User said: {user_message}")
+            print(f"User said: {user_message}")
+            send_message_to_server("Processing...")
 
             # Continue the conversation on the appropriate thread
             if current_name:
@@ -185,11 +200,22 @@ def assistant_process(shared_queue):
                 # Output the assistant's response (speak it and send to UI)
                 ui_message = pretty_print(VOICE_TTS, response)
                 if ui_message:
-                    ui_queue.put(ui_message)
+                    with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as tmp_aiff:
+                        aiff_path = tmp_aiff.name
+                    generate_tts_aiff(VOICE_TTS, ui_message, aiff_path)
+
+                    # 2. Convert the AIFF to WAV format
+                    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_wav:
+                        wav_path = tmp_wav.name
+                    convert_aiff_to_wav(aiff_path, wav_path)
+                    
+                    send_wav_file_to_server(wav_path)
+                    send_message_to_server(ui_message)
 
         except sr.WaitTimeoutError:
             # No speech heard within the timeout
             print("[Assistant] Listening timed out. Waiting for user to speak...")
+            response = requests.post("http://127.0.0.1:5500/audio_finished")
             continue
         except Exception as e:
             # Catch-all for any unexpected errors to prevent crash

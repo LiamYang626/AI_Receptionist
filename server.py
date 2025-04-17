@@ -21,6 +21,7 @@ app.add_middleware(
 class Message(BaseModel):
     text: str
 
+
 # 간단한 인메모리 메시지 저장소
 message_store = {"text": "Loading..."}
 
@@ -41,6 +42,7 @@ def post_message(message: Message):
     message_store["text"] = message.text
     return {"status": "ok", "text": message.text}
 
+
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -59,9 +61,32 @@ async def get_audio():
     file_location = os.path.join(UPLOAD_DIR, "latest.wav")
     if not os.path.exists(file_location):
         raise HTTPException(status_code=404, detail="Audio file not found")
-    return FileResponse(file_location, media_type="audio/wav", filename="latest.wav")
+    response = FileResponse(file_location, media_type="audio/wav", filename="latest.wav")
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+audio_finished_flag = False
+
+
+@app.post("/audio_finished")
+async def audio_finished():
+    # This endpoint is called when the client signals that audio playback has ended.
+    global audio_finished_flag
+    audio_finished_flag = True
+    print("[Server] Received audio playback finished signal.")
+    return {"status": "ok"}
+
+
+@app.get("/audio_finished")
+async def get_audio_finished():
+    global audio_finished_flag
+    flag = audio_finished_flag
+    # Reset flag after reading
+    audio_finished_flag = False
+    return {"audio_finished": flag}
 
 
 # 서버 실행 (이 코드는 launcher.py에서 import 하여 run_server()로 호출할 수 있도록 만듭니다.)
 def run_server():
-    uvicorn.run("server:app", host="127.0.0.1", port=5500, reload=True)
+    uvicorn.run("server:app", host="127.0.0.1", port=5500, reload=True, access_log=False)
