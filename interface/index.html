@@ -25,21 +25,12 @@
     <section id="SiriWave" class="mb-4">
 
         <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
-                        <div class="">
-                            <p class="text-start text-light mb-4 siri-message" style="font-size: 28px;">
-                                <ul class="texts">
-                                    <li></li>
-                                </ul>
-                            </p>
-                            <div id="siri-container"></div>
-                            <audio id="audioPlayer" controls hidden> </audio>
-                        </div>
-                    </div>
-                </div>
+            <div id="chat">
+                <div class="message siri"></div>
+                <div class="message user"></div>
             </div>
+            <div id="siri-container"></div>
+            <audio id="audioPlayer" controls hidden> </audio>
         </div>
 
     </section>

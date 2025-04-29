@@ -133,7 +133,7 @@ def vision_process(shared_queue):
                 gaze(frame, landmarks[0])
 
             # Display the result
-            cv2.imshow('Camera', frame)
+            # cv2.imshow('Camera', frame)
 
             # Handle key presses
             key = cv2.waitKey(1) & 0xFF

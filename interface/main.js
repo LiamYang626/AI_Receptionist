@@ -2,23 +2,30 @@
 $(document).ready(function(){
 
   // Initialize textillate for the Siri message.
+  /*
   $('.siri-message').textillate({
     loop: true,
     sync: true,
-    in: { effect: "fadeInUp", sync: true },
-    out: { effect: "fadeOutUp", sync: true }
+    in: { effect: "fadeInLeft", sync: true },
+    out: { effect: "fadeOutRight", sync: true }
   });
-
+  $('.siri-message').textillate();
+  */
+  
   // Initialize SiriWave.
   const siriWave = new SiriWave({
     container: document.getElementById("siri-container"),
+    cover: true,
     width: 800,
     height: 200,
     style: "ios9",
     amplitude: 1,
     speed: 0.30,
-    autostart: true
+    autostart: true,
+    amplitude: 0.3,   
+    speed:     0.1
   });
+  siriWave.start();
 
   function runAudioVisualizer() {
     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
@@ -69,8 +76,41 @@ $(document).ready(function(){
   runAudioVisualizer();
 
   let currentMessage = "";
+  let systemBubble = null;
 
-  updateUI("Initializing...");
+  function appendChatBubble(role, text){
+    if(role === "system"){                          
+      if(systemBubble){
+          systemBubble.text(text);
+          $("#system").text(text);               
+      }
+      else{
+          systemBubble = $("<div/>",{
+              "class":"message system", text
+          });
+          $("#chat").append(systemBubble);
+      }
+      $("#chat").scrollTop($("#chat")[0].scrollHeight);
+      return;                                     
+    }
+  
+    let $bubble;
+    if(systemBubble){                               // reuse same row
+        $bubble = systemBubble;
+        systemBubble = null;                        // it’s now a normal bubble
+    }else{
+        $bubble = $("<div/>");
+        $("#chat").append($bubble);
+    }
+
+    // configure for the correct side
+    if(role === "user"){
+        $bubble.attr("class","message user").text(text);
+    }else{                                          // assistant
+        $bubble.attr("class","message siri").text(text);
+    }
+    $("#chat").scrollTop($("#chat")[0].scrollHeight);
+  }
 
   async function pollMessages() {
     try {
@@ -80,22 +120,16 @@ $(document).ready(function(){
         setTimeout(pollMessages, 1000);
         return;
       }
-      const audio_response = await fetch("http://127.0.0.1:5500/audio");
-      if (!audio_response.ok) {
-        console.error("HTTP error:", audio_response.status);
-        setTimeout(pollMessages, 1000);
-        return;
-      }
       const data = await response.json();
-      if (data.text !== currentMessage){
-        console.log("Received message:", data.text);
-        updateUI(data.text);
-        currentMessage = data.text;
-        if(data.text !== "Listening..." && data.text !== "Transcribing..." && data.text !== "Processing...") {
+      const message = data.role + "|" + data.content;
+      if (message !== currentMessage){
+        console.log("Received message:", data.content);
+        appendChatBubble(data.role, data.content);
+        currentMessage = message;
+        if(data.role === "assistant") {
           let audioPlayer = document.getElementById("audioPlayer");
           if (audioPlayer) {
             audioPlayer.src = "http://127.0.0.1:5500/audio?t=" + Date.now();
-            audioPlayer
             audioPlayer.play().catch(e => console.error("Audio play error:", e));
           }
         }

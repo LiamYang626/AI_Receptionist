@@ -280,3 +280,57 @@ svg {
     transform: rotate(360deg);
   }
 }
+
+/* SiriWave 섹션을 기준 삼기 위해 포지션을 relative 로 설정 */
+#SiriWave {
+  position: relative;
+  min-height: 100vh;    /* 섹션 전체를 화면 높이만큼 차지하도록 */
+  display: flex;
+  align-items: flex-start; /* 내부 콘텐츠는 위쪽에 붙어 있게 */
+}
+
+/* .siri-message 는 그대로 위에, wave 만 아래로 내린다 */
+#siri-container {
+  position: absolute;
+  bottom: 20px;        /* 화면 하단에서 20px 위 */
+  left: 50%;           /* 가로 중앙 정렬 */
+  transform: translateX(-50%);
+  width: 100%;         /* 필요에 따라 조절 */
+  max-width: 800px;    /* 기존 width 와 동일하게 유지 */
+  height: 200px;       /* 기존 height 와 동일하게 유지 */
+}
+
+#chat {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  max-width:800px;              /* 800 px = #siri-container’s max-width   */
+  width:100%;
+  margin:0 auto;                /* centre inside the section              */
+  padding:20px 0 0px;         /* bottom padding = distance to the wave  */
+  height:calc(100vh - 200px);   /* full height minus wave’s 200 px height */
+  overflow-y:auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  max-width: 70%;
+  margin-bottom: 10px;
+  padding: 10px 15px;
+  border-radius: 20px;
+  line-height: 1.4;
+}
+
+.user {
+  align-self: flex-end;
+}
+
+.system {
+  align-self: center;
+}
+
+.siri {
+  align-self: flex-start;
+}

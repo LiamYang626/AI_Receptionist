@@ -2,9 +2,11 @@ from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.staticfiles import StaticFiles
 from pydantic import BaseModel
 import uvicorn
 import os
+import tempfile
 
 app = FastAPI()
 
@@ -19,11 +21,12 @@ app.add_middleware(
 
 # 메시지 모델 정의
 class Message(BaseModel):
-    text: str
+    role: str
+    content: str
 
 
 # 간단한 인메모리 메시지 저장소
-message_store = {"text": "Loading..."}
+message_store = {"role": "assistant", "content": "Loading..."}
 
 app.mount("/Interface", StaticFiles(directory="Interface", html=True), name="static")
 
@@ -39,8 +42,9 @@ def get_message():
 # 클라이언트가 POST 요청으로 메시지를 보내면 저장
 @app.post("/message")
 def post_message(message: Message):
-    message_store["text"] = message.text
-    return {"status": "ok", "text": message.text}
+    message_store["role"] = message.role
+    message_store["content"] = message.content
+    return {"status": "ok"}
 
 
 UPLOAD_DIR = "uploads"
@@ -50,9 +54,13 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 @app.post("/upload_audio")
 async def upload_audio(file: UploadFile = File(...)):
     file_location = os.path.join(UPLOAD_DIR, "latest.wav")
-    with open(file_location, "wb") as buffer:
-        buffer.write(await file.read())
-    return {"status": "ok", "filename": "latest.wav"}
+    with tempfile.NamedTemporaryFile(dir=UPLOAD_DIR, suffix=".wav", delete=False) as tmp:
+        tmp.write(await file.read())
+        tmp_path = tmp.name         
+    os.replace(tmp_path, file_location)
+
+    return {"status": "ok"}
+
 
 
 # WAV 파일을 반환하는 엔드포인트 (클라이언트가 음성을 재생할 때 사용)

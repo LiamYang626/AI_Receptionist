@@ -23,9 +23,9 @@ USE_LOCAL_MIC = True            # Toggle between backend mic vs. front-end input
 client = OpenAI(api_key=API_KEY)  # Initialize OpenAI client
 
 
-def send_message_to_server(message_text):
+def send_message_to_server(role: str, content: str):
     url = "http://127.0.0.1:5500/message"
-    data = {"text": message_text}
+    data = {"role": role, "content": content}
     try:
         response = requests.post(url, json=data)
         if response.status_code != 200:
@@ -145,16 +145,16 @@ def assistant_process(shared_queue):
                     
                     send_wav_file_to_server(wav_path)
 
-                    send_message_to_server(ui_message)
+                    send_message_to_server("assistant", ui_message)
 
                 else:
                     # Resume existing conversation thread for returning person
                     print(f"[Assistant] Resuming conversation with {current_name}")
                     thread = name_to_thread[current_name]
-                    send_message_to_server("Listening...")
+                    send_message_to_server("system", "Listening...")
 
             wait_for_audio_finished()
-            send_message_to_server("Listening...")
+            send_message_to_server("system", "Listening...")
 
             # Listen for the user's speech input
             user_message = ""
@@ -165,7 +165,7 @@ def assistant_process(shared_queue):
                     audio_data = recognizer.listen(source, timeout=3)
                 with open("temp.wav", "wb") as f:
                     f.write(audio_data.get_wav_data())
-                send_message_to_server("Transcribing...")
+                send_message_to_server("system", "Transcribing...")
                 print("[Assistant] Transcribing speech...")
                 try:
                     result = model.transcribe("temp.wav")
@@ -183,7 +183,9 @@ def assistant_process(shared_queue):
                 continue
 
             print(f"User said: {user_message}")
-            send_message_to_server("Processing...")
+            send_message_to_server("user", user_message)
+            time.sleep(1)
+            send_message_to_server("system", "Processing...")
 
             # Continue the conversation on the appropriate thread
             if current_name:
@@ -210,7 +212,7 @@ def assistant_process(shared_queue):
                     convert_aiff_to_wav(aiff_path, wav_path)
                     
                     send_wav_file_to_server(wav_path)
-                    send_message_to_server(ui_message)
+                    send_message_to_server("assistant", ui_message)
 
         except sr.WaitTimeoutError:
             # No speech heard within the timeout
