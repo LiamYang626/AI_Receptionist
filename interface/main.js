@@ -155,6 +155,8 @@ $(document).ready(function(){
     $("#chat").scrollTop($("#chat")[0].scrollHeight);
   }
 
+  appendChatBubble('system', 'Initializing...');
+
   async function pollMessages() {
     try {
       const response = await fetch("http://127.0.0.1:5500/message?t=" + Date.now(), { cache: "no-store" });

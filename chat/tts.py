@@ -1,4 +1,8 @@
 from pydub import AudioSegment
+import os
+import subprocess
+import requests
+import time
 
 
 def milliseconds_until_sound(sound, silence_threshold_in_decibels=-30.0, chunk_size=10) -> int:
@@ -34,3 +38,34 @@ def openai_transcribe_audio(client, filepath: str) -> str:
             file=audio_data
         )
     return transcription.text
+
+
+def generate_tts_aiff(voice, text, output_path):
+    """
+    Generate an AIFF file using the macOS 'say' command.
+    """
+    cmd = f'say -v "{voice}" -o "{output_path}" "{text}"'
+    os.system(cmd)
+
+
+def convert_aiff_to_wav(aiff_path, wav_path):
+    """
+    Convert AIFF to WAV using the macOS afconvert tool.
+    """
+    cmd = f'afconvert -f WAVE -d LEI16 "{aiff_path}" "{wav_path}"'
+    subprocess.run(cmd, shell=True, check=True)
+
+
+def wait_for_audio_finished():
+    # Poll the server every 1 second until it indicates that audio playback is complete.
+    while True:
+        try:
+            response = requests.get("http://127.0.0.1:5500/audio_finished")
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("audio_finished", False):
+                    print("[Assistant] Audio finished signal received.")
+                    break
+        except Exception as e:
+            print("[Assistant] Error polling audio finished status:", e)
+        time.sleep(1)

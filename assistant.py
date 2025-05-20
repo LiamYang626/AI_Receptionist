@@ -12,7 +12,8 @@ import whisper
 from chat.response import get_response, pretty_print
 from chat.runs import wait_on_run
 from chat.threads import create_thread_and_run, continue_thread_and_run
-from chat.tts import openai_transcribe_audio
+from chat.tts import generate_tts_aiff, convert_aiff_to_wav, wait_for_audio_finished
+from chat.send_server import send_message_to_server, send_wav_file_to_server
 
 # ========= Constants and Initialization =========
 load_dotenv()
@@ -21,67 +22,6 @@ ASSISTANT_ID = os.getenv("ASSISTANT_KEY")
 VOICE_TTS = "Ava (Premium)"      # Voice name for TTS output
 USE_LOCAL_MIC = True            # Toggle between backend mic vs. front-end input
 client = OpenAI(api_key=API_KEY)  # Initialize OpenAI client
-
-
-def send_message_to_server(role: str, content: str):
-    url = "http://127.0.0.1:5500/message"
-    data = {"role": role, "content": content}
-    try:
-        response = requests.post(url, json=data)
-        if response.status_code != 200:
-            print("Error: Received non-200 status code")
-            return
-        # JSON 파싱 시도
-        try:
-            json_data = response.json()
-            print("Server response:", json_data)
-        except Exception as json_err:
-            print("Error parsing JSON response:", json_err)
-            print("Raw response text:", response.text)
-    except Exception as e:
-        print("Error sending message:", e)
-
-
-def send_wav_file_to_server(file_path):
-    url = "http://127.0.0.1:5500/upload_audio"
-    try:
-        with open(file_path, "rb") as f:
-            files = {"file": f}
-            response = requests.post(url, files=files)
-            print("Audio file upload response:", response.text)
-    except Exception as e:
-        print("Error uploading audio file:", e)
-
-
-def generate_tts_aiff(voice, text, output_path):
-    """
-    Generate an AIFF file using the macOS 'say' command.
-    """
-    cmd = f'say -v "{voice}" -o "{output_path}" "{text}"'
-    os.system(cmd)
-
-
-def convert_aiff_to_wav(aiff_path, wav_path):
-    """
-    Convert AIFF to WAV using the macOS afconvert tool.
-    """
-    cmd = f'afconvert -f WAVE -d LEI16 "{aiff_path}" "{wav_path}"'
-    subprocess.run(cmd, shell=True, check=True)
-
-
-def wait_for_audio_finished():
-    # Poll the server every 1 second until it indicates that audio playback is complete.
-    while True:
-        try:
-            response = requests.get("http://127.0.0.1:5500/audio_finished")
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("audio_finished", False):
-                    print("[Assistant] Audio finished signal received.")
-                    break
-        except Exception as e:
-            print("[Assistant] Error polling audio finished status:", e)
-        time.sleep(1)
 
 
 def assistant_process(shared_queue):
