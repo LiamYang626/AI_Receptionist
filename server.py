@@ -26,7 +26,7 @@ class Message(BaseModel):
 
 
 # 간단한 인메모리 메시지 저장소
-message_store = {"role": "assistant", "content": "Loading..."}
+message_store = {"role": "system", "content": "Initializing..."}
 
 app.mount("/Interface", StaticFiles(directory="Interface", html=True), name="static")
 

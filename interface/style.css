@@ -304,15 +304,13 @@ svg {
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   color: white;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   max-width:800px;              /* 800 px = #siri-container’s max-width   */
   width:100%;
   margin:0 auto;                /* centre inside the section              */
   padding:20px 0 0px;         /* bottom padding = distance to the wave  */
   height:calc(100vh - 200px);   /* full height minus wave’s 200 px height */
   overflow-y:auto;
-  display: flex;
-  flex-direction: column;
 }
 
 .message {

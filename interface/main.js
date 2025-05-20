@@ -131,7 +131,7 @@ $(document).ready(function(){
           systemBubble = $("<div/>",{
               "class":"message system loading-text", text
           });
-          $("#chat").append(systemBubble);
+          $("#chat").prepend(systemBubble);
       }
       $("#chat").scrollTop($("#chat")[0].scrollHeight);
       return;                                     
@@ -143,7 +143,7 @@ $(document).ready(function(){
         systemBubble = null;                        // it’s now a normal bubble
     }else{
         $bubble = $("<div/>");
-        $("#chat").append($bubble);
+        $("#chat").prepend($bubble);
     }
 
     // configure for the correct side
