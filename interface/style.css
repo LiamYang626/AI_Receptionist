@@ -334,3 +334,38 @@ svg {
 .siri {
   align-self: flex-start;
 }
+
+/* ─────── Shimmer “generating…” text effect ─────── */
+:root{
+  --highlight-color: #d3eeff7e;   /* tweak colour */
+  --highlight-colour: #e2f5ff;   /* tweak colour */
+  --shimmer-speed : 1.5s;       /* tweak speed  */
+}
+
+.loading-text{
+  font-size: 1.6rem;
+  font-weight:600;
+  /* horizontal gradient that slides left→right */
+  background:linear-gradient(
+      90deg,
+      var(--highlight-color) 0%,
+      var(--highlight-colour) 25%,
+      var(--highlight-color) 50%);
+  background-size:200% 100%;
+  background-position:100% 0;
+
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+          background-clip:text;
+          color:transparent;          /* graceful fallback */
+
+  animation:shimmer var(--shimmer-speed) linear infinite;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .loading-text{animation:none;}
+}
+
+@keyframes shimmer{
+  to{background-position:-100% 0;}
+}

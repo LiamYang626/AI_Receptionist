@@ -16,4 +16,4 @@ def wait_on_run(client, run, thread):
         elif run_status.status == "failed":
             print("Run failed:", run_status.last_error)
             break
-        time.sleep(2)
+        time.sleep(1)

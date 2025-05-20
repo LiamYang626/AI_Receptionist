@@ -75,6 +75,7 @@ $(document).ready(function(){
   }
   runAudioVisualizer();
 
+
   let currentMessage = "";
   let systemBubble = null;
 
@@ -86,7 +87,7 @@ $(document).ready(function(){
       }
       else{
           systemBubble = $("<div/>",{
-              "class":"message system", text
+              "class":"message system loading-text", text
           });
           $("#chat").append(systemBubble);
       }

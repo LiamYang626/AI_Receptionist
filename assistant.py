@@ -130,6 +130,7 @@ def assistant_process(shared_queue):
                     response_message = get_response(client, thread)
                     # Format and send the assistant's response (text and audio) to UI
                     ui_message = pretty_print(VOICE_TTS, response_message)
+                    print(f"[Assistant] {ui_message}")
                         
                     # Save the new thread for this person
                     name_to_thread[current_name] = thread
@@ -201,6 +202,7 @@ def assistant_process(shared_queue):
                 response = get_response(client, thread)
                 # Output the assistant's response (speak it and send to UI)
                 ui_message = pretty_print(VOICE_TTS, response)
+                print(f"[Assistant] {ui_message}")
                 if ui_message:
                     with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as tmp_aiff:
                         aiff_path = tmp_aiff.name
