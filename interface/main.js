@@ -27,54 +27,96 @@ $(document).ready(function(){
   });
   siriWave.start();
 
+  let micStream, micCtx;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+
+  // Set up audio file analysis once
+  const audioP = document.getElementById("audioPlayer");
+  let fileCtx, fileAnalyser;
+  if (audioP) {
+    fileCtx = new AudioCtx();
+    fileAnalyser = fileCtx.createAnalyser();
+    const approxVisFreq = 5;
+    const totalSamplesFile = fileCtx.sampleRate / approxVisFreq;
+    fileAnalyser.fftSize = 2 ** Math.floor(Math.log2(totalSamplesFile));
+
+    // Create a single MediaElementSourceNode for the audioPlayer
+    const fileSource = fileCtx.createMediaElementSource(audioP);
+    fileSource.connect(fileAnalyser);
+    fileAnalyser.connect(fileCtx.destination);
+  }
+
+  // Visualize live microphone input (client speaking)
   function runAudioVisualizer() {
     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
       .then(stream => {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        const ctx = new AudioCtx();
-        const source = ctx.createMediaStreamSource(stream);
-        const analyser = ctx.createAnalyser();
+        micStream = stream;
+        micCtx = new AudioCtx();
+        const source = micCtx.createMediaStreamSource(stream);
+        const analyser = micCtx.createAnalyser();
 
-        // FFT 크기 설정 (원본 예제의 대략 5Hz 갱신 기준)
+        // Configure FFT size based on ~5Hz update rate
         const approxVisFreq = 5;
-        const sampleRate = ctx.sampleRate;
-        const totalSamples = sampleRate / approxVisFreq;
+        const totalSamples = micCtx.sampleRate / approxVisFreq;
         analyser.fftSize = 2 ** Math.floor(Math.log2(totalSamples));
 
         source.connect(analyser);
-        siriWave.start();
 
         const freqData = new Uint8Array(analyser.frequencyBinCount);
         const timeData = new Uint8Array(analyser.frequencyBinCount);
 
-        function updateVisual() {
-          // 주파수 스펙트럼
-          analyser.getByteFrequencyData(freqData);
-          // 시간 도메인(파형) 데이터
+        function updateMicVisual() {
           analyser.getByteTimeDomainData(timeData);
-
-          // 1) 진폭 계산: 파형의 최대치에서 128 빼기
           const amp = timeData.reduce((max, v) => Math.max(max, v), 128) - 128;
-          const normAmp = amp / 128 * 10;        // [0..10] 범위
-          siriWave.setAmplitude(normAmp);
+          siriWave.setAmplitude((amp / 128) * 10);
 
-          // 2) 최고 주파수 빈(bin) 찾기
-          let maxBin = 0;
+          analyser.getByteFrequencyData(freqData);
+          let maxBin = 1;
           for (let i = 1; i < freqData.length; i++) {
             if (freqData[i] > freqData[maxBin]) maxBin = i;
           }
-          const freq = maxBin * (sampleRate / 2) / analyser.frequencyBinCount;
-          siriWave.setSpeed(freq / 10000);       // [0..~2] 범위 조정
+          const freq = maxBin * (micCtx.sampleRate / 2) / analyser.frequencyBinCount;
+          siriWave.setSpeed(freq / 10000);
 
-          requestAnimationFrame(updateVisual);
+          requestAnimationFrame(updateMicVisual);
         }
-
-        updateVisual();
+        updateMicVisual();
       })
       .catch(err => console.error("Audio visualizer error:", err));
   }
   runAudioVisualizer();
 
+  // Visualize assistant's audio file using same analyser
+  function runAudioFileVisualizer() {
+    // Stop mic visualization
+    if (micStream) micStream.getTracks().forEach(t => t.stop());
+    if (micCtx) micCtx.close();
+
+    if (!fileAnalyser || !audioP) return;
+
+    siriWave.start();
+    const freqData = new Uint8Array(fileAnalyser.frequencyBinCount);
+    const timeData = new Uint8Array(fileAnalyser.frequencyBinCount);
+
+    function updateFileVisual() {
+      fileAnalyser.getByteTimeDomainData(timeData);
+      const amp = timeData.reduce((max, v) => Math.max(max, v), 128) - 128;
+      siriWave.setAmplitude((amp / 128) * 10);
+
+      fileAnalyser.getByteFrequencyData(freqData);
+      let maxBin = 1;
+      for (let i = 1; i < freqData.length; i++) {
+        if (freqData[i] > freqData[maxBin]) maxBin = i;
+      }
+      const freq = maxBin * (fileCtx.sampleRate / 2) / fileAnalyser.frequencyBinCount;
+      siriWave.setSpeed(freq / 10000);
+
+      if (!audioP.paused) {
+        requestAnimationFrame(updateFileVisual);
+      }
+    }
+    updateFileVisual();
+  }
 
   let currentMessage = "";
   let systemBubble = null;
@@ -131,7 +173,9 @@ $(document).ready(function(){
           let audioPlayer = document.getElementById("audioPlayer");
           if (audioPlayer) {
             audioPlayer.src = "http://127.0.0.1:5500/audio?t=" + Date.now();
-            audioPlayer.play().catch(e => console.error("Audio play error:", e));
+            audioPlayer.play()
+              .then(() => runAudioFileVisualizer(audioPlayer))
+              .catch(e => console.error("Audio play error:", e));
           }
         }
 
@@ -162,7 +206,7 @@ $(document).ready(function(){
           body: JSON.stringify({ status: "audio_ended" })
       })
       .then(response => response.json())
-      .then(data => console.log("Audio finished signal sent, server response:", data))
+      .then(() => runAudioVisualizer())
       .catch(error => console.error("Error sending audio finished signal:", error));
     });
   }
