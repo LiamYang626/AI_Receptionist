@@ -173,5 +173,4 @@ cython_debug/
 
 # Audio Files
 uploads/
-temp.wav
-uploads/latest.wav
+*.wav

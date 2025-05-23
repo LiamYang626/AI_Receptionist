@@ -51,10 +51,19 @@ def assistant_process(shared_queue):
                 # Get a new recognized name from the vision process (if available)
                 new_name = shared_queue.get().strip()
 
+            if new_name == "None":
+                current_name = new_name
+                send_message_to_server("system", "No one detected. Waiting for user...")
+                continue
+
+            if new_name == "" and current_name == "None":
+                continue
+            
             # If a new person is detected (or person changed)
             if new_name != "" and new_name != current_name:
-                if current_name:
+                if current_name and new_name not in name_to_thread:
                     print(f"[Assistant] Switching conversation to {new_name}")
+                    send_message_to_server("system", f"Switching conversation to {new_name}...")
                 current_name = new_name
 
                 # If this is a first-time visitor or a "Guest", start a new thread
@@ -91,8 +100,26 @@ def assistant_process(shared_queue):
                 else:
                     # Resume existing conversation thread for returning person
                     print(f"[Assistant] Resuming conversation with {current_name}")
+                    send_message_to_server("system", f"Resuming conversation with {current_name}...")
                     thread = name_to_thread[current_name]
-                    send_message_to_server("system", "Listening...")
+                    user_message = "Hello, I am back."
+                    run = continue_thread_and_run(client, ASSISTANT_ID, thread, user_message)
+                    wait_on_run(client, run, thread)
+                    response_message = get_response(client, thread)
+                    ui_message = pretty_print(VOICE_TTS, response_message)
+                    with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as tmp_aiff:
+                        aiff_path = tmp_aiff.name
+                    generate_tts_aiff(VOICE_TTS, ui_message, aiff_path)
+
+                    # 2. Convert the AIFF to WAV format
+                    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_wav:
+                        wav_path = tmp_wav.name
+                    convert_aiff_to_wav(aiff_path, wav_path)
+                    
+                    send_wav_file_to_server(wav_path)
+
+                    send_message_to_server("assistant", ui_message)
+
 
             wait_for_audio_finished()
             send_message_to_server("system", "Listening...")
@@ -155,6 +182,7 @@ def assistant_process(shared_queue):
                     
                     send_wav_file_to_server(wav_path)
                     send_message_to_server("assistant", ui_message)
+                    wait_for_audio_finished()
 
         except sr.WaitTimeoutError:
             # No speech heard within the timeout

@@ -10,6 +10,7 @@ from vision.detector import detect_people
 from vision.tracking import initialize_deepsort, track_objects
 from vision.recognition import encode_file, recognizing_face
 from vision.utils import initialize_object_detector, initialize_face_detector, initialize_landmark_detector
+from chat.send_server import send_message_to_server
 # from vision.visualization import draw_bounding_box
 
 fileEncodingsName = 'models/encodings-everyone-2023-11-30-17-50-53-weekofcode2324.dat'
@@ -56,6 +57,7 @@ column_names = [
 def vision_process(shared_queue):
     # Main loop
     current_selected_name = None
+    first = True
     try:
         while cap.isOpened():
             ret, frame = cap.read()
@@ -67,6 +69,10 @@ def vision_process(shared_queue):
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             detection = detect_people(model, frame)
+
+            if not detection and first:
+                first = False
+                shared_queue.put("None")
 
             # Pass detection results to DeepSORT and track
             tracked_objects = track_objects(deepsort, detection, frame=frame)
@@ -80,6 +86,9 @@ def vision_process(shared_queue):
             for track in tracked_objects:
                 if not track.is_confirmed() or track.time_since_update > 1:
                     continue
+                
+                if not current_selected_name:
+                    send_message_to_server("system", "Recognizing faces...")
 
                 track_id = track.track_id
                 bbox = track.to_tlbr()
@@ -114,6 +123,7 @@ def vision_process(shared_queue):
                     recognized_names.add(name)
 
             if recognized_names:
+                first = True
                 # If the current selected name is not present, choose a new one.
                 if current_selected_name not in recognized_names:
                     # You can choose the first one, or use random.choice(list(recognized_names))

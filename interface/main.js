@@ -159,7 +159,7 @@ $(document).ready(function(){
 
   async function pollMessages() {
     try {
-      const response = await fetch("http://127.0.0.1:5500/message?t=" + Date.now(), { cache: "no-store" });
+      const response = await fetch("http://127.0.0.1:5500/message");
       if (!response.ok) {
         console.error("HTTP error:", response.status);
         setTimeout(pollMessages, 1000);
@@ -180,7 +180,6 @@ $(document).ready(function(){
               .catch(e => console.error("Audio play error:", e));
           }
         }
-
       }
       // 메시지를 수신하면 즉시 다음 메시지를 기다림 (롱 폴링)
       pollMessages();
