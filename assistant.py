@@ -97,6 +97,8 @@ def assistant_process(shared_queue):
 
                     send_message_to_server("assistant", ui_message)
 
+                    wait_for_audio_finished()
+
                 else:
                     # Resume existing conversation thread for returning person
                     print(f"[Assistant] Resuming conversation with {current_name}")
@@ -120,8 +122,8 @@ def assistant_process(shared_queue):
 
                     send_message_to_server("assistant", ui_message)
 
+                    wait_for_audio_finished()
 
-            wait_for_audio_finished()
             send_message_to_server("system", "Listening...")
 
             # Listen for the user's speech input
